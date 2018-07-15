@@ -1,0 +1,8 @@
+Config.json
+bin/Debug/netcoreapp2.0/Simple twitch bot.dll
+bin/Debug/netcoreapp2.0/Simple twitch bot.pdb
+obj/Debug/netcoreapp2.0/Simple twitch bot.dll
+obj/Debug/netcoreapp2.0/Simple twitch bot.pdb
+obj/Debug/netcoreapp2.0/Simple twitch bot.csproj.CoreCompileInputs.cache
+Channels.json
+*.json
