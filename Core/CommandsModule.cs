@@ -1,18 +1,17 @@
 ﻿using System.Collections.Generic;
-using WBot.Core;
+using Bot.Core;
 using System;
 
-namespace WBot
+namespace Bot
 {
     public class CommandsModule
     {
-        private List<string> Ids = new List<string>();
-        // TODO Add option to subscribe to module 
+        private List<string> ids = new List<string>();
         private List<string> ActiveChannels = new List<string>();
 
         private IRC irc;
         public List<string> getIds() {
-            return Ids;
+            return ids;
         }
 
         public List<string> getActiveChannels() {
@@ -42,7 +41,6 @@ namespace WBot
                     return false;
                 }
             }
-            Console.WriteLine(2);
             ActiveChannels.Add(channel);
             return true;
         }
@@ -61,11 +59,11 @@ namespace WBot
         public virtual void HandleMessage(string channel, string msg, string sender) { }
 
         public void addId(string id) {
-            Ids.Add(id);
+            ids.Add(id);
         }
         
         public CommandsModule(List<string> _Ids, List<string> _ActiveChannels, IRC _irc) {
-            Ids = _Ids;
+            ids = _Ids;
             ActiveChannels = _ActiveChannels;
             irc = _irc;
         }

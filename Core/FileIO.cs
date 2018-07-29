@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text;
 
-namespace WBot.Core
+namespace Bot.Core
 {
     public class FileIO
     {

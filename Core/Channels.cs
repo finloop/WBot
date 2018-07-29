@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using System;
 
-namespace WBot.Core
+namespace Bot.Core
 {
     public class Channels
     {
@@ -17,7 +17,7 @@ namespace WBot.Core
             }
         }
 
-        public void AddCommToChannel(string channel, string moduleName) {
+        public void AddModuleToChannel(string channel, string moduleName) {
             for(int i = 0; i < listOfChannels.Count; i++) {
                 if(channel.Equals(listOfChannels[i].Name)) {
                     Console.WriteLine(listOfChannels[i].ActiveModules.FindIndex(x => x.Equals(moduleName)));

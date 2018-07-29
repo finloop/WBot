@@ -1,8 +1,8 @@
-﻿using WBot.Core;
+﻿using Bot.Core;
 using System.Collections.Generic;
 using System;
 
-namespace WBot
+namespace Bot
 {
     class Program
     {        static void Main(string[] args)

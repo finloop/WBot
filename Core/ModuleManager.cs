@@ -1,14 +1,42 @@
-using WBot.Core;
+using Bot.Core;
 using System.Collections.Generic;
-using WBot.Modules.HelloWorld;
+using Bot.Modules.HelloWorld;
 using System;
 
-namespace WBot.Core
+namespace Bot.Core
 {
     public class ModuleManager
     {
         List<CommandsModule> commandsModules = new List<CommandsModule>();
+
+        List<PassiveModule> PassiveModules = new List<PassiveModule>();
         Channels channels = new Channels();
+        public ModuleManager(IRC _irc)
+        {
+            InitializeCommandModules(_irc);
+
+        }
+
+        private void InitializeCommandModules(IRC irc)
+        {
+
+            // Add modules here modules.add(....)
+            channels = FileIO.ReadConfigJson(channels);
+            commandsModules.Add(new HelloWorld(getActiveChannels(typeof(HelloWorld).FullName), irc));
+        }
+
+        public List<string> getActiveChannels(string moduleName) {
+            List<string> temp = new List<string>();
+            for(int i = 0; i < channels.listOfChannels.Count; i++) {
+                if(channels.listOfChannels[i].ActiveModules.FindIndex(x => x.Equals(moduleName)) != -1) {
+                    temp.Add(channels.listOfChannels[i].Name);
+                }
+            }
+            for(int i = 0; i < temp.Count; i++) {
+                Console.WriteLine(temp[i]);
+            }
+            return temp;
+        }
 
         public void Handle(string channel, string msg, string sender)
         {
@@ -20,12 +48,15 @@ namespace WBot.Core
                 // Check every commandModule 
                 for (int i = 0; i < commandsModules.Count; i++)
                 {
+                    Console.WriteLine("1");
                     // Check every command in commmand module
                     List<string> list = commandsModules[i].getIds();
                     for (int k = 0; k < list.Count; k++)
                     {
+                        Console.WriteLine("2");
                         if (msg.StartsWith(list[k]) & ((channels.FindModuleIndex(channels.listOfChannels[channelindex], commandsModules[i].GetType().ToString())) != -1))
                         {
+                            Console.WriteLine("3");
                             commandsModules[i].HandleMessage(channel, msg, sender);
                         }
                     }
@@ -50,6 +81,7 @@ namespace WBot.Core
             UpdateChannelsData(channel);
         }
 
+        // Join channel's chat
         public void AddChannel(string channel)
         {
             int i = channels.listOfChannels.FindIndex(x => x.Name.Equals(channel));
@@ -79,19 +111,7 @@ namespace WBot.Core
             UpdateChannelsData(channel);
         }
 
-        public ModuleManager(IRC _irc)
-        {
-            InitializeModules(_irc);
 
-        }
-
-        private void InitializeModules(IRC irc)
-        {
-
-            // Add modules here modules.add(....)
-            channels = FileIO.ReadConfigJson(channels);
-            commandsModules.Add(new HelloWorld(new List<string>(), irc));
-        }
 
 
         private void UpdateChannelsData(string channel)
@@ -106,11 +126,12 @@ namespace WBot.Core
                     int m = commandsModules[k].getActiveChannels().FindIndex(x => x.Equals(channel));
                     if (m != -1)
                     {
-                        Console.WriteLine(3);
-                        channels.AddCommToChannel(channel, commandsModules[k].GetType().ToString());
+                        Console.WriteLine("Updating channels data....");
+                        channels.AddModuleToChannel(channel, commandsModules[k].GetType().ToString());
                     }
                 }
             }
+            Console.WriteLine("Finished updatking channels...");
             FileIO.WriteConfigJson(channels);
         }
     }

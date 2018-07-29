@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace WBot.Core
+namespace Bot.Core
 {
     class StringTokenizer
     {

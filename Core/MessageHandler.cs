@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace WBot.Core
+namespace Bot.Core
 {
     class MessageHandler
     {
@@ -21,42 +21,14 @@ namespace WBot.Core
 
             if (message.Contains("PRIVMSG") | message.Contains("WHISPER"))
             {
-                
-
                 string[] res = StringTokenizer.TokenizeChatMsg(message);
 
                 string sender = res[0];
                 string channel = res[1];
                 string msg = res[2];
 
-                // Only channel owner can sub 
-                if (msg.StartsWith("!sub"))
-                {
-                    string[] temp = msg.Split(' ');
-                    if(temp.Length >= 2) {
-                        for(int i = 1; i < temp.Length; i++) {
-                            moduleManager.AddCommToChannel(channel, temp[i]);
-                        }
-                    }
+                // Only channel owner can subs
 
-                    else {
-                        _irc.ConnectTo(sender);
-                        moduleManager.AddChannel(sender);
-                    }
-                    
-                } else if (msg.StartsWith("!unsub") /* & sender.Equals(channel) */) {
-                    string[] temp = msg.Split(' ');
-                    if(temp.Length >= 2) {
-                        for(int i = 1; i < temp.Length; i++) {
-                            moduleManager.RemoveCommFromChannel(channel, temp[i]);
-                        }
-                    }
-                    else {
-                        _irc.DisconnectFrom(channel);
-                        moduleManager.RemoveChannel(channel);
-                    }
-                }
-                
                 moduleManager.Handle(channel, msg, sender);
             }
         }
