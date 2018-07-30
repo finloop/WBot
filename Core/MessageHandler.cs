@@ -12,8 +12,8 @@ namespace Bot.Core
 
         public MessageHandler(IRC irc)
         {
-            moduleManager = new ModuleManager(irc);
             _irc = irc;
+            moduleManager = new ModuleManager(_irc);
         }
         public void HandleMessage(string message)
         {
@@ -21,16 +21,11 @@ namespace Bot.Core
 
             if (message.Contains("PRIVMSG") | message.Contains("WHISPER"))
             {
-                string[] res = StringTokenizer.TokenizeChatMsg(message);
-
-                string sender = res[0];
-                string channel = res[1];
-                string msg = res[2];
-
-                // Only channel owner can subs
-
-                moduleManager.Handle(channel, msg, sender);
+                Message msg = new Message(StringTokenizer.TokenizeChatMsg(message));
+                moduleManager.messages.TryAdd(msg, 100);      
             }
         }
+
+        
     }
 }

@@ -2,6 +2,8 @@ using Bot.Core;
 using System.Collections.Generic;
 using Bot.Modules.HelloWorld;
 using System;
+using System.Threading;
+using System.Collections.Concurrent;
 
 namespace Bot.Core
 {
@@ -10,11 +12,30 @@ namespace Bot.Core
         List<CommandsModule> commandsModules = new List<CommandsModule>();
 
         List<PassiveModule> PassiveModules = new List<PassiveModule>();
-        Channels channels = new Channels();
+        public Channels channels = new Channels();
+        public BlockingCollection<Message> messages;
+        public Thread worker;
+    
         public ModuleManager(IRC _irc)
         {
             InitializeCommandModules(_irc);
+            messages  = new BlockingCollection<Message>();
+            worker = new Thread(DoWork);
+            worker.IsBackground = true;
+            worker.Start();
 
+            Console.WriteLine("Starting worker....");
+        }
+
+        private void DoWork() {
+            while(true) {
+                if(messages.Count >= 1) {
+                    Message m;
+                    if(messages.TryTake(out m, TimeSpan.FromSeconds(1)));
+                        Handle(m);
+                    
+                }
+            }
         }
 
         private void InitializeCommandModules(IRC irc)
@@ -32,17 +53,21 @@ namespace Bot.Core
                     temp.Add(channels.listOfChannels[i].Name);
                 }
             }
+
+            /* 
+             * DEBUG: print list of channels implementing module
+             *
             for(int i = 0; i < temp.Count; i++) {
                 Console.WriteLine(temp[i]);
-            }
+            } 
+            */
             return temp;
         }
 
-        public void Handle(string channel, string msg, string sender)
+        public void Handle(Message message)
         {
-
             // Check if channel exist on the list if so check command modues
-            int channelindex = channels.FindChannel(channel);
+            int channelindex = channels.FindChannel(message.channel);
             if (channelindex != -1)
             {
                 // Check every commandModule 
@@ -54,10 +79,10 @@ namespace Bot.Core
                     for (int k = 0; k < list.Count; k++)
                     {
                         Console.WriteLine("2");
-                        if (msg.StartsWith(list[k]) & ((channels.FindModuleIndex(channels.listOfChannels[channelindex], commandsModules[i].GetType().ToString())) != -1))
+                        if (message.msg.StartsWith(list[k]) & ((channels.FindModuleIndex(channels.listOfChannels[channelindex], commandsModules[i].GetType().ToString())) != -1))
                         {
                             Console.WriteLine("3");
-                            commandsModules[i].HandleMessage(channel, msg, sender);
+                            commandsModules[i].HandleMessage(message.channel, message.msg, message.sender);
                         }
                     }
 

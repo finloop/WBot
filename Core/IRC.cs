@@ -36,17 +36,21 @@ namespace Bot.Core
             ip = parameters.ip;
         }
 
-        private void Connect()
+        public void Connect()
         {
             try
             {
+                //Console.WriteLine("Connecting...");
                 tcpClient = new TcpClient(ip, port);
                 reader = new StreamReader(tcpClient.GetStream());
                 writer = new StreamWriter(tcpClient.GetStream());
 
                 writer.WriteLine("PASS " + oauth);
+                //Console.WriteLine("PASS " + oauth);
                 writer.WriteLine("NICK " + botName);
+               // Console.WriteLine("NICK " + botName);
                 writer.WriteLine("USER " + botName + " 8 * :" + botName);
+                //Console.WriteLine("USER " + botName + " 8 * :" + botName);
 
                 for (int i = 0; i < channels.Count; i++)
                 {

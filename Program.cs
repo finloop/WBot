@@ -1,6 +1,7 @@
 ﻿using Bot.Core;
 using System.Collections.Generic;
 using System;
+using System.Threading;
 
 namespace Bot
 {
@@ -16,8 +17,9 @@ namespace Bot
             }
             // Read config from file
             IRC irc = new IRC(FileIO.ReadConfigParameters("Config.json"), listchannels);
-
-
+            irc.Connect();
+        
+            Console.WriteLine("message");
             MessageHandler messageHandler = new MessageHandler(irc);
 
             // Main loop

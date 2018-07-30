@@ -7,16 +7,16 @@ namespace Bot.Core
     class StringTokenizer
     {
         // returns [sender, channel, message]
-        public static string[] TokenizeChatMsg(string message)
+        public static List<string> TokenizeChatMsg(string message)
         {
         
-            string[] vs = new string[3];
+            List<string> vs = new List<string>();
             int intIndexParseSign = message.IndexOf('!');
-            vs[0] = message.Substring(1, intIndexParseSign - 1);                                                            
+            vs.Add(message.Substring(1, intIndexParseSign - 1));                                                            
             intIndexParseSign = message.IndexOf(" :");
             int len = intIndexParseSign - message.IndexOf("#") - 1;
-            vs[1] = message.Substring(message.IndexOf("#") + 1, len);
-            vs[2] = message.Substring(intIndexParseSign + 2);
+            vs.Add(message.Substring(message.IndexOf("#") + 1, len));
+            vs.Add(message.Substring(intIndexParseSign + 2));
             return vs;
         }
     }
