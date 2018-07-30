@@ -4,6 +4,7 @@ using Bot.Modules.HelloWorld;
 using System;
 using System.Threading;
 using System.Collections.Concurrent;
+using Bot.Modules.Subscribe;
 
 namespace Bot.Core
 {
@@ -11,7 +12,7 @@ namespace Bot.Core
     {
         List<CommandsModule> commandsModules = new List<CommandsModule>();
 
-        List<PassiveModule> PassiveModules = new List<PassiveModule>();
+        List<PassiveModule> passiveModules = new List<PassiveModule>();
         public Channels channels = new Channels();
         public BlockingCollection<Message> messages;
         public Thread worker;
@@ -19,6 +20,7 @@ namespace Bot.Core
         public ModuleManager(IRC _irc)
         {
             InitializeCommandModules(_irc);
+            InitializePassiveModules(_irc);
             messages  = new BlockingCollection<Message>();
             worker = new Thread(DoWork);
             worker.IsBackground = true;
@@ -31,19 +33,26 @@ namespace Bot.Core
             while(true) {
                 if(messages.Count >= 1) {
                     Message m;
-                    if(messages.TryTake(out m, TimeSpan.FromSeconds(1)));
+                    if(messages.TryTake(out m, TimeSpan.FromSeconds(1))) {
                         Handle(m);
+                    }
+
                     
+                } else {
+                    Thread.Sleep(50);
                 }
             }
         }
 
         private void InitializeCommandModules(IRC irc)
         {
-
             // Add modules here modules.add(....)
             channels = FileIO.ReadConfigJson(channels);
             commandsModules.Add(new HelloWorld(getActiveChannels(typeof(HelloWorld).FullName), irc));
+        }
+
+        private void InitializePassiveModules(IRC irc) {
+            passiveModules.Add(new Subscribe(this, irc));
         }
 
         public List<string> getActiveChannels(string moduleName) {
@@ -88,6 +97,25 @@ namespace Bot.Core
 
                 }
             }
+
+            for (int i = 0; i < passiveModules.Count; i++)
+                {
+                    
+                    // Check every command in commmand module
+                    List<string> list = passiveModules[i].getIds();
+                    for (int k = 0; k < list.Count; k++)
+                    {
+
+                        if (message.msg.StartsWith(list[k]))
+                        {
+                            
+                            Console.WriteLine(4);
+                            passiveModules[i].HandleMessage(message.sender, message.channel, message.msg);
+                        }
+                    }
+
+                }
+
 
         }
 

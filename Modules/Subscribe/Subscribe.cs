@@ -1,20 +1,22 @@
 using Bot.Core;
 using System.Collections.Generic;
-
+using System;
 namespace Bot.Modules.Subscribe
 {
-    public class Subscriptions : PassiveModule
+    public class Subscribe : PassiveModule
     {
 
-        public Subscriptions(ModuleManager _moduleManager, IRC _irc) : base(_moduleManager, _irc) {
+        public Subscribe(ModuleManager _moduleManager, IRC _irc) : base(_moduleManager, _irc) {
             addId("!sub");
             addId("!unsub");
         }
         
-        override public void HandleMessage(string sender, string channel, string msg)
+        override public void HandleMessage(string channel, string msg, string sender) 
         {
+            Console.WriteLine("msg");
             if (msg.StartsWith("!sub"))
             {
+                
                 string[] temp = msg.Split(' ');
                 if (temp.Length >= 2)
                 {
@@ -33,11 +35,14 @@ namespace Bot.Modules.Subscribe
             }
             else if (msg.StartsWith("!unsub") /* & sender.Equals(channel) */)
             {
+                Console.WriteLine(1);
                 string[] temp = msg.Split(' ');
                 if (temp.Length >= 2)
                 {
+                    Console.WriteLine(2);
                     for (int i = 1; i < temp.Length; i++)
                     {
+                        Console.WriteLine(3);
                         moduleManager.RemoveModuleFromChannel(channel, temp[i]);
                     }
                 }

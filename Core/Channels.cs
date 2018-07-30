@@ -20,10 +20,11 @@ namespace Bot.Core
         public void AddModuleToChannel(string channel, string moduleName) {
             for(int i = 0; i < listOfChannels.Count; i++) {
                 if(channel.Equals(listOfChannels[i].Name)) {
-                    Console.WriteLine(listOfChannels[i].ActiveModules.FindIndex(x => x.Equals(moduleName)));
+                    //Console.WriteLine(listOfChannels[i].ActiveModules.FindIndex(x => x.Equals(moduleName)));
                     if (listOfChannels[i].ActiveModules.FindIndex(x => x.Equals(moduleName)) == -1) {
-                        
+                        Console.WriteLine("k");
                         listOfChannels[i].ActiveModules.Add(moduleName);
+                        
                     }
                 }
             }

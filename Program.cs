@@ -18,6 +18,7 @@ namespace Bot
             // Read config from file
             IRC irc = new IRC(FileIO.ReadConfigParameters("Config.json"), listchannels);
             irc.Connect();
+            irc.SendChatMessage("preclak", "Działaj!!");
         
             Console.WriteLine("message");
             MessageHandler messageHandler = new MessageHandler(irc);

@@ -13,8 +13,7 @@ namespace Bot
         public List<string> getIds() {
             return ids;
         }
-
-        public List<string> getActiveChannels() {
+  public List<string> getActiveChannels() {
             return ActiveChannels;
         }
 
@@ -25,7 +24,6 @@ namespace Bot
             }  
             return false;
         }
-
         public void SendChatMessage(string channel, string msg) {
             irc.SendChatMessage(channel,msg);
         }
