@@ -20,14 +20,14 @@ namespace Bot.Modules.Subscribe
                 {
                     for (int i = 1; i < temp.Length; i++)
                     {
-                        base.moduleManager.AddCommToChannel(channel, temp[i]);
+                        base.moduleManager.AddModuleToChannel(channel, temp[i]);
                     }
                 }
 
                 else
                 {
                     irc.ConnectTo(sender);
-                    moduleManager.AddChannel(sender);
+                    moduleManager.JoinChannel(sender);
                 }
 
             }
@@ -38,13 +38,13 @@ namespace Bot.Modules.Subscribe
                 {
                     for (int i = 1; i < temp.Length; i++)
                     {
-                        moduleManager.RemoveCommFromChannel(channel, temp[i]);
+                        moduleManager.RemoveModuleFromChannel(channel, temp[i]);
                     }
                 }
                 else
                 {
                     irc.DisconnectFrom(channel);
-                    moduleManager.RemoveChannel(channel);
+                    moduleManager.LeaveChannel(channel);
                 }
             }
         }

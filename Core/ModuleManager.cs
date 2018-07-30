@@ -73,15 +73,15 @@ namespace Bot.Core
                 // Check every commandModule 
                 for (int i = 0; i < commandsModules.Count; i++)
                 {
-                    Console.WriteLine("1");
+
                     // Check every command in commmand module
                     List<string> list = commandsModules[i].getIds();
                     for (int k = 0; k < list.Count; k++)
                     {
-                        Console.WriteLine("2");
+
                         if (message.msg.StartsWith(list[k]) & ((channels.FindModuleIndex(channels.listOfChannels[channelindex], commandsModules[i].GetType().ToString())) != -1))
                         {
-                            Console.WriteLine("3");
+
                             commandsModules[i].HandleMessage(message.channel, message.msg, message.sender);
                         }
                     }
@@ -91,7 +91,7 @@ namespace Bot.Core
 
         }
 
-        public void AddCommToChannel(string channel, string comm)
+        public void AddModuleToChannel(string channel, string comm)
         {
             for (int i = 0; i < commandsModules.Count; i++)
             {
@@ -107,21 +107,21 @@ namespace Bot.Core
         }
 
         // Join channel's chat
-        public void AddChannel(string channel)
+        public void JoinChannel(string channel)
         {
             int i = channels.listOfChannels.FindIndex(x => x.Name.Equals(channel));
             if (i == -1)
                 channels.listOfChannels.Add(new Channels.Channel(channel));
         }
 
-        public void RemoveChannel(string channel)
+        public void LeaveChannel(string channel)
         {
             int i = channels.listOfChannels.FindIndex(x => x.Name.Equals(channel));
             if (i != -1)
                 channels.listOfChannels.RemoveAt(channels.listOfChannels.FindIndex(x => x.Name.Equals(channel)));
         }
 
-        public void RemoveCommFromChannel(string channel, string comm)
+        public void RemoveModuleFromChannel(string channel, string comm)
         {
             for (int i = 0; i < commandsModules.Count; i++)
             {
@@ -156,7 +156,7 @@ namespace Bot.Core
                     }
                 }
             }
-            Console.WriteLine("Finished updatking channels...");
+            Console.WriteLine("Finished updating channels...");
             FileIO.WriteConfigJson(channels);
         }
     }
