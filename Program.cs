@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System;
 using System.Threading;
+using Bot.Extensions.MySql;
 
 namespace Bot
 {
@@ -22,6 +23,7 @@ namespace Bot
         
             Console.WriteLine("message");
             MessageHandler messageHandler = new MessageHandler(irc);
+            List<string> k = MySqlWrapper.MakeQuery("select Name from VIEWERS.POINTSTABLE");
 
             // Main loop
             while(true)
