@@ -7,7 +7,7 @@ namespace Bot.Extensions.Debug
     {
         public static void WriteLine(string line)
         {
-            FileStream fs = new FileStream("debug.log", FileMode.OpenOrCreate, FileAccess.Write);
+            FileStream fs = new FileStream("debug.log", FileMode.Append, FileAccess.Write);
                 using (StreamWriter sw = new StreamWriter(fs))
                 {
                     sw.WriteLine(line);
