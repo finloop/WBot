@@ -36,7 +36,6 @@ namespace Bot.Extensions.MySql
                 connection = new MySqlConnection(connstring);
                 
                 connection.Open();
-                Console.WriteLine("COnnection is online.. " + connection.Ping().ToString()); 
             }
 
             return true;

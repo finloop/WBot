@@ -6,14 +6,18 @@ namespace Bot
 {
     public class CommandsModule
     {
+        #region VARIABLES
+        
         private List<string> ids = new List<string>();
         private List<string> ActiveChannels = new List<string>();
-
         private IRC irc;
+
+        #endregion
+
         public List<string> getIds() {
             return ids;
         }
-  public List<string> getActiveChannels() {
+        public List<string> getActiveChannels() {
             return ActiveChannels;
         }
 
@@ -60,6 +64,7 @@ namespace Bot
             ids.Add(id);
         }
         
+        #region CONSTRUCTORS
         public CommandsModule(List<string> _Ids, List<string> _ActiveChannels, IRC _irc) {
             ids = _Ids;
             ActiveChannels = _ActiveChannels;
@@ -71,6 +76,7 @@ namespace Bot
             irc = _irc;
             //saveState();
         }
+        #endregion
 
     }
 }
