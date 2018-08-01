@@ -4,13 +4,14 @@ using System;
 using System.Threading;
 using Bot.Extensions.MySql;
 using Bot.Extensions.Debug;
+using Bot.Extensions.CommandLine;
 
 namespace Bot
 {
     class Program
     {        static void Main(string[] args)
         {
-            Log.WriteLine("Hello!");
+            CommandLine cmd = new CommandLine(args);
             Channels channels = new Channels();
             channels = FileIO.ReadConfigJson(channels);
 

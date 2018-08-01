@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
+using Bot.Extensions.Debug;
 
 namespace Bot.Core
 {
@@ -10,6 +11,8 @@ namespace Bot.Core
     {
         public static ConfigParameters ReadConfigParameters(string filename)
         {
+            try
+            {
             using (StreamReader readtext = new StreamReader(filename))
             {
                 string json = "";
@@ -20,6 +23,14 @@ namespace Bot.Core
                 }
                 return JsonConvert.DeserializeObject<ConfigParameters>(json);
             }
+                        }
+            catch (IOException e)
+            {
+                Log.WriteLine(e.Message);
+                Log.WriteLine("Failed to deserialize Config.json");
+                System.Environment.Exit(1);
+            }
+            return new ConfigParameters();
         }
 
         public static T ReadConfigJson<T>(T moduleParams)
@@ -39,7 +50,8 @@ namespace Bot.Core
             }
             catch (IOException e)
             {
-                Console.WriteLine(e.Message);
+                Log.WriteLine(e.Message);
+                Log.WriteLine("Failed to deserialize " +  typeof(T).Name + ".json");
                 System.Environment.Exit(1);
             }
             return moduleParams;
@@ -49,7 +61,7 @@ namespace Bot.Core
         {
             try
             {
-                using (StreamWriter writetext = new StreamWriter(typeof(T).Name + ".json"))
+                using (StreamWriter writetext = new StreamWriter(typeof(T).Name + ".json", false))
                 {
                     string json = JsonConvert.SerializeObject(moduleParams);
                     writetext.Write(json);
@@ -58,7 +70,26 @@ namespace Bot.Core
             }
             catch (IOException e)
             {
-                Console.WriteLine(e.Message);
+                Log.WriteLine(e.Message);
+                Log.WriteLine("Failed to serialize " +  typeof(T).Name + ".json");
+                System.Environment.Exit(1);
+            }
+        }
+
+        public static void WriteString(string filename, string text)
+        {
+            try
+            {
+                using (StreamWriter writetext = new StreamWriter(filename))
+                {
+                    writetext.Write(text);
+                    writetext.Flush();
+                }
+            }
+            catch (IOException e)
+            {
+                Log.WriteLine(e.Message);
+                Log.WriteLine("Failed to write " + filename);
                 System.Environment.Exit(1);
             }
         }
