@@ -10,10 +10,16 @@ namespace Bot.Extensions.Debug
             FileStream fs = new FileStream("debug.log", FileMode.Append, FileAccess.Write);
                 using (StreamWriter sw = new StreamWriter(fs))
                 {
-                    sw.WriteLine(line);
+                    sw.WriteLine(System.DateTime.Now +": "+ line);
                 }
         
-            Console.WriteLine(line);
+            Console.WriteLine(System.DateTime.Now +": " +line);
+        }
+
+        public static void Exception (Exception e) {
+            WriteLine(e.Message);
+            WriteLine(e.StackTrace);
+            Environment.Exit(1);
         }
     }
 }

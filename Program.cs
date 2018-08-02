@@ -20,6 +20,7 @@ namespace Bot
             for(int i = 0; i < channels.listOfChannels.Count; i++) {
                 listchannels.Add(channels.listOfChannels[i].Name);
             }
+            List<string> k = MySqlWrapper.MakeQuery("string k");
 
             // Read config from file
             IRC irc = new IRC(FileIO.ReadConfigParameters("Config.json"), listchannels);

@@ -51,7 +51,6 @@ namespace Bot.Core
             catch (IOException e)
             {
                 Log.WriteLine(e.Message);
-                Log.WriteLine("Failed to deserialize " +  typeof(T).Name + ".json");
                 System.Environment.Exit(1);
             }
             return moduleParams;
@@ -71,7 +70,6 @@ namespace Bot.Core
             catch (IOException e)
             {
                 Log.WriteLine(e.Message);
-                Log.WriteLine("Failed to serialize " +  typeof(T).Name + ".json");
                 System.Environment.Exit(1);
             }
         }
@@ -89,7 +87,6 @@ namespace Bot.Core
             catch (IOException e)
             {
                 Log.WriteLine(e.Message);
-                Log.WriteLine("Failed to write " + filename);
                 System.Environment.Exit(1);
             }
         }

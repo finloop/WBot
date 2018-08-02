@@ -1,6 +1,7 @@
 using System;
 using MySql.Data;
 using MySql.Data.MySqlClient;
+using Bot.Extensions.Debug;
 
 namespace Bot.Extensions.MySql
 {
@@ -35,7 +36,12 @@ namespace Bot.Extensions.MySql
                 string connstring = string.Format("Server=localhost; database={0}; UID={1}; password={2}; SslMode=none", databaseName, login, password);
                 connection = new MySqlConnection(connstring);
                 
-                connection.Open();
+                try{
+                    connection.Open();
+                } catch (Exception e) {
+                    Log.WriteLine(e.Message);
+                }
+                
             }
 
             return true;

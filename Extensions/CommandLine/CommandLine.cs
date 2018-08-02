@@ -9,14 +9,12 @@ namespace Bot.Extensions.CommandLine
     {
         public CommandLine(string[] args)
         {
-            Log.WriteLine("command");
             for (int i = 0; i < args.Length; i++)
                 HandleCommand(args[i]);
         }
 
         private void HandleCommand(string command)
         {
-            Log.WriteLine(command);
             if (command.ToLower().Equals("-help"))
             {
                 Log.WriteLine("Avalible commands:\n-help - Displays help \n-generate-example - Genrates example files: Config.json, Channels.json"
