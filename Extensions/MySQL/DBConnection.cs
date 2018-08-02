@@ -39,7 +39,7 @@ namespace Bot.Extensions.MySql
                 try{
                     connection.Open();
                 } catch (Exception e) {
-                    Log.WriteLine(e.Message);
+                    Log.Exception(e);
                 }
                 
             }

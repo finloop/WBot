@@ -26,8 +26,7 @@ namespace Bot.Core
                         }
             catch (IOException e)
             {
-                Log.WriteLine(e.Message);
-                Log.WriteLine("Failed to deserialize Config.json");
+                Log.Exception(e);
                 System.Environment.Exit(1);
             }
             return new ConfigParameters();
@@ -50,7 +49,7 @@ namespace Bot.Core
             }
             catch (IOException e)
             {
-                Log.WriteLine(e.Message);
+                Log.Exception(e);
                 System.Environment.Exit(1);
             }
             return moduleParams;
@@ -69,7 +68,7 @@ namespace Bot.Core
             }
             catch (IOException e)
             {
-                Log.WriteLine(e.Message);
+                Log.Exception(e);
                 System.Environment.Exit(1);
             }
         }
@@ -86,7 +85,7 @@ namespace Bot.Core
             }
             catch (IOException e)
             {
-                Log.WriteLine(e.Message);
+                Log.Exception(e);
                 System.Environment.Exit(1);
             }
         }
