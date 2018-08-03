@@ -9,7 +9,7 @@ namespace Bot
         #region VARIABLES
         
         private List<string> ids = new List<string>();
-        private List<string> ActiveChannels = new List<string>();
+        public List<string> ActiveChannels = new List<string>();
         private IRC irc;
 
         #endregion
@@ -37,7 +37,7 @@ namespace Bot
         }
 
         
-        public bool AddToChannel(string channel) {
+        public virtual bool AddToChannel(string channel) {
             for(int i = 0; i < ActiveChannels.Count; i++) {
                 if(channel.Equals(ActiveChannels[i])) {
                     return false;

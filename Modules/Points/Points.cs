@@ -25,6 +25,17 @@ namespace Bot.Modules.Points
 
         }
 
+        override public bool AddToChannel(string channel) {
+            for(int i = 0; i < ActiveChannels.Count; i++) {
+                if(channel.Equals(ActiveChannels[i])) {
+                    return false;
+                }
+            }
+            ActiveChannels.Add(channel);
+            string sb = string.Format("use VIEWERS; CREATE TABLE `{0}` (`Name` text COLLATE utf8mb4_unicode_ci,`Points` int(11) DEFAULT NULL,`TotalPoints` int(11) DEFAULT NULL) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;", channel);
+            MySqlWrapper.MakeQuery(sb);
+            return true;
+        }
         static public void AddPointsIfOnChannel(string channel)
         {
             if (true)

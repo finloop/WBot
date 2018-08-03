@@ -23,10 +23,14 @@ namespace Bot
             {
                 listchannels.Add(channels.listOfChannels[i].Name);
             }
-
+            
             // Read config from file
             IRC irc = new IRC(FileIO.ReadConfigParameters("Config.json"), listchannels);
             irc.Connect();
+            string sb = string.Format("use VIEWERS; CREATE TABLE `{0}` (`Name` text COLLATE utf8mb4_unicode_ci,`Points` int(11) DEFAULT NULL,`TotalPoints` int(11) DEFAULT NULL) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;", "lordozopl");
+
+                MySqlWrapper.MakeQuery(sb);
+
 
             MessageHandler messageHandler = new MessageHandler(irc);
 
