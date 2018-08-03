@@ -7,9 +7,7 @@ namespace Bot.Core
     class MessageHandler
     {
         private ModuleManager moduleManager;
-
         private IRC _irc;
-
         public MessageHandler(IRC irc)
         {
             _irc = irc;
@@ -25,7 +23,5 @@ namespace Bot.Core
                 moduleManager.messages.TryAdd(msg, 100);      
             }
         }
-
-        
     }
 }

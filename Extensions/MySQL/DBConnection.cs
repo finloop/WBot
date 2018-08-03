@@ -33,6 +33,7 @@ namespace Bot.Extensions.MySql
         {
             if (Connection == null)
             {
+
                 string connstring = string.Format("Server=localhost; database={0}; UID={1}; password={2}; SslMode=none", databaseName, login, password);
                 connection = new MySqlConnection(connstring);
                 
@@ -42,8 +43,18 @@ namespace Bot.Extensions.MySql
                     Log.Exception(e);
                 }
                 
+                
+            } else if(Connection.State.ToString().Equals("Closed")) {
+                                string connstring = string.Format("Server=localhost; database={0}; UID={1}; password={2}; SslMode=none", databaseName, login, password);
+                connection = new MySqlConnection(connstring);
+                
+                try{
+                    connection.Open();
+                } catch (Exception e) {
+                    Log.Exception(e);
+                }
             }
-
+           
             return true;
         }
 

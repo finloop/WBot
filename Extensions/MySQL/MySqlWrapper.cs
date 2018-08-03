@@ -8,7 +8,7 @@ namespace Bot.Extensions.MySql
 {
     public class MySqlWrapper
     {
-        public static List<string> MakeQuery(string query)
+        public static List<string> MakeQuery(string query, string column)
         {
             var dbCon = DBConnection.Instance();
             MySqlConfig config = FileIO.ReadConfigJson(new MySqlConfig());
@@ -26,17 +26,14 @@ namespace Bot.Extensions.MySql
                     var reader = cmd.ExecuteReader();
                     while (reader.Read())
                     {
-                        result.Add(reader.GetString("Name"));
+                        result.Add(reader.GetString(column));
 
                     }
                 } catch(Exception e) {
                     Log.Exception(e);
                 }
-
-
-                dbCon.Close();
-            }
-
+            } 
+            dbCon.Close();
             return result;
         }
     }
