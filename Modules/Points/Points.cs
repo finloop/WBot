@@ -11,30 +11,99 @@ namespace Bot.Modules.Points
     public class Points : CommandsModule
     {
         private Thread points_thread;
-
-
+        public static PointsConfig pointsConfig;
         public Points(List<string> _ActiveChannels, IRC _irc) : base(_ActiveChannels, _irc)
         {
+            pointsConfig = FileIO.ReadConfigJson(new PointsConfig());
             points_thread = new Thread(HandlePoints);
             points_thread.IsBackground = true;
             points_thread.Start();
+            base.addId("!points");
+            base.addId("!config pointsName:");
+            base.addId("!config pointsNameMultiple:");
+            base.addId("!config challengeName:");
+            base.addId("!config challengeAccept:");
         }
 
         override public void HandleMessage(string channel, string msg, string sender)
         {
-
+            for (int i = 0; i < base.getIds().Count; i++)
+            {
+                string id = base.getIds()[i];
+                if (msg.StartsWith(id))
+                {
+                    if (id.Equals("!config pointsName:"))
+                    {
+                        int index = pointsConfig.Channels.FindIndex(x => x.Name.Equals(channel));
+                        string s = msg.Replace("!config pointsName:","");
+                        pointsConfig.Channels[index].pointsName = s;
+                    }
+                    else if (id.Equals("!config pointsNameMultiple:"))
+                    {
+                        int index = pointsConfig.Channels.FindIndex(x => x.Name.Equals(channel));
+                        string s = msg.Replace("!config pointsNameMultiple:","");
+                        pointsConfig.Channels[index].pointsNameMultiple = s;
+                    }
+                    else if (id.Equals("!config challengeName:"))
+                    {
+                        int index = pointsConfig.Channels.FindIndex(x => x.Name.Equals(channel));
+                        string s = msg.Replace("!config challengeName:","");
+                        pointsConfig.Channels[index].challengeName = s;
+                    }
+                    else if (id.Equals("!config challengeAccept:"))
+                    {
+                        int index = pointsConfig.Channels.FindIndex(x => x.Name.Equals(channel));
+                        string s = msg.Replace("!config challengeAccept:","");
+                        pointsConfig.Channels[index].challengeAccept = s;
+                    }
+                    //CODE
+                    for (int k = 0; k < pointsConfig.Channels.Count; k++)
+                    {
+                        if (id.Equals(pointsConfig.Channels[k].pointsName))
+                        {
+                            // handle showpoints()
+                        }
+                        else if (id.Equals(pointsConfig.Channels[k].challengeName))
+                        {
+                            // handle startChannenge()
+                        }
+                    }
+                    break;
+                }
+            }
         }
 
-        override public bool AddToChannel(string channel) {
-            for(int i = 0; i < ActiveChannels.Count; i++) {
-                if(channel.Equals(ActiveChannels[i])) {
+        override public bool AddToChannel(string channel)
+        {
+            for (int i = 0; i < ActiveChannels.Count; i++)
+            {
+                if (channel.Equals(ActiveChannels[i]))
+                {
                     return false;
                 }
             }
             ActiveChannels.Add(channel);
-            string sb = string.Format("use VIEWERS; CREATE TABLE `{0}` (`Name` text COLLATE utf8mb4_unicode_ci,`Points` int(11) DEFAULT NULL,`TotalPoints` int(11) DEFAULT NULL) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;", channel);
+            PointsConfig.Channel ch = new PointsConfig.Channel();
+            ch.Name = channel;
+            ch.pointsName = "points";
+            ch.pointsNameMultiple = "points";
+            pointsConfig.Channels.Add(ch);
+            string sb = string.Format("use VIEWERS; CREATE TABLE `{0}` (`Name` text COLLATE utf8mb4_unicode_ci,`Points` int(11) DEFAULT NULL,`TotalPoints` int(11) DEFAULT NULL,`Challenger` text COLLATE utf8mb4_unicode_ci) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;", channel);
             MySqlWrapper.MakeQuery(sb);
             return true;
+        }
+        public override bool RemoveFromChannel(string channel)
+        {
+            for (int i = 0; i < ActiveChannels.Count; i++)
+            {
+                if (channel.Equals(ActiveChannels[i]))
+                {
+                    ActiveChannels.Remove(channel);
+                    pointsConfig.Channels.RemoveAt(pointsConfig.Channels.FindIndex(x => x.Name.Equals(channel)));
+                    return true;
+                }
+            }
+            return false;
         }
         static public void AddPointsIfOnChannel(string channel)
         {

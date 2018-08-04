@@ -47,7 +47,7 @@ namespace Bot
             return true;
         }
 
-        public bool RemoveFromChannel(string channel) {
+        public virtual bool RemoveFromChannel(string channel) {
             for(int i = 0; i < ActiveChannels.Count; i++) {
                 if(channel.Equals(ActiveChannels[i])) {
                     ActiveChannels.Remove(channel);
