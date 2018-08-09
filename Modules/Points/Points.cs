@@ -30,6 +30,7 @@ namespace Bot.Modules.Points
             for (int i = 0; i < base.getIds().Count; i++)
             {
                 string id = base.getIds()[i];
+                
                 if (msg.StartsWith(id))
                 {
                     if (id.Equals("!config pointsName:"))
@@ -71,6 +72,7 @@ namespace Bot.Modules.Points
                     break;
                 }
             }
+            PointsCommands.Handle(channel,msg,sender,base.irc);
         }
 
         override public bool AddToChannel(string channel)
@@ -83,6 +85,7 @@ namespace Bot.Modules.Points
                 }
             }
             ActiveChannels.Add(channel);
+
             PointsConfig.Channel ch = new PointsConfig.Channel();
             ch.Name = channel;
             ch.pointsName = "points";
@@ -90,6 +93,7 @@ namespace Bot.Modules.Points
             pointsConfig.Channels.Add(ch);
             string sb = string.Format("use VIEWERS; CREATE TABLE `{0}` (`Name` text COLLATE utf8mb4_unicode_ci,`Points` int(11) DEFAULT NULL,`TotalPoints` int(11) DEFAULT NULL,`Challenger` text COLLATE utf8mb4_unicode_ci) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;", channel);
             MySqlWrapper.MakeQuery(sb);
+            FileIO.WriteConfigJson(ch);
             return true;
         }
         public override bool RemoveFromChannel(string channel)

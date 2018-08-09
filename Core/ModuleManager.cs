@@ -5,6 +5,7 @@ using System;
 using System.Threading;
 using System.Collections.Concurrent;
 using Bot.Modules.Subscribe;
+using Bot.Modules.Points;
 
 namespace Bot.Core
 {
@@ -16,6 +17,7 @@ namespace Bot.Core
         public Channels channels = new Channels();
         public BlockingCollection<Message> messages;
         public Thread worker;
+        private IRC irc;
     
         public ModuleManager(IRC _irc)
         {
@@ -25,7 +27,7 @@ namespace Bot.Core
             worker = new Thread(DoWork);
             worker.IsBackground = true;
             worker.Start();
-
+            irc = _irc;
             Console.WriteLine("Starting worker....");
         }
 
@@ -49,6 +51,7 @@ namespace Bot.Core
             // Add modules here modules.add(....)
             channels = FileIO.ReadConfigJson(channels);
             commandsModules.Add(new HelloWorld(getActiveChannels(typeof(HelloWorld).FullName), irc));
+            commandsModules.Add(new Points(getActiveChannels(typeof(Points).FullName), irc));
         }
 
         private void InitializePassiveModules(IRC irc) {
@@ -109,8 +112,7 @@ namespace Bot.Core
                         if (message.msg.StartsWith(list[k]))
                         {
                             
-                            Console.WriteLine(4);
-                            passiveModules[i].HandleMessage(message.sender, message.channel, message.msg);
+                            passiveModules[i].HandleMessage(message.channel, message.msg, message.sender);
                         }
                     }
 
@@ -128,6 +130,7 @@ namespace Bot.Core
                 if (k != -1)
                 {
                     commandsModules[i].AddToChannel(channel);
+                    irc.SendChatMessage(channel, "added" + comm +" to this channel");
                 }
 
             }
@@ -158,6 +161,7 @@ namespace Bot.Core
                 if (k != -1)
                 {
                     commandsModules[i].RemoveFromChannel(channel);
+                    irc.SendChatMessage(channel, "removed" + comm +" to this channel");
                 }
 
             }

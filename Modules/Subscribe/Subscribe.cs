@@ -13,7 +13,7 @@ namespace Bot.Modules.Subscribe
         
         override public void HandleMessage(string channel, string msg, string sender) 
         {
-            Console.WriteLine("msg");
+            Console.WriteLine(msg);
             if (msg.StartsWith("!sub"))
             {
                 

@@ -40,6 +40,9 @@ namespace Bot.Core
         public List<string> getIds() {
             return ids;
         }
+        public IRC getIRC() {
+            return irc;
+        }
 
     }
 }

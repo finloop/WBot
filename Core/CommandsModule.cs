@@ -10,7 +10,7 @@ namespace Bot
         
         private List<string> ids = new List<string>();
         public List<string> ActiveChannels = new List<string>();
-        private IRC irc;
+        public IRC irc;
 
         #endregion
 
