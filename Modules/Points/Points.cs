@@ -135,14 +135,35 @@ namespace Bot.Modules.Points
             setPoints(channel, name, _points + points);
             setTotalPoints(channel, name, _totalPoints + points);
         }
-        public static void removePoints(string channel, string name, int points)
+
+        ///<summary>Removes some amount of points from user.</summary>
+        ///<para name="channel">Channel's name.</para>
+        ///<para name="name">Username.</para>
+        ///<para name="points">Number of points to remove.</para>
+        ///<returns>Returns true if points were removed else false.</returns>
+        public static bool removePoints(string channel, string name, int points)
         {
             int _points = getPoints(channel, name);
-            setPoints(channel, name, _points - points);
+            if(points >= _points) {
+                if(setPoints(channel, name, 0))
+                    return true;
+                else 
+                    return false;
+            } else {
+                if(setPoints(channel, name, _points - points))
+                    return true;
+                else 
+                    return false;
+            }
+            
         }
+
+        ///<summary>Checks if user exits in database.</summary>
+        ///<para name="channel">Channel name</para>
+        ///<para name="name">Username</para>
+        ///<returns>Returns true if user exists in db or false if user does not exist..</returns>
         public static bool doesUserExist(string channel, string name)
         {
-
             string fill = string.Format("select Name from VIEWERS.{0} where Name = \"{1}\"", channel, name);
             List<string> query = MySqlWrapper.MakeQuery(fill, "Name");
             if (query.Count > 0)
@@ -150,25 +171,56 @@ namespace Bot.Modules.Points
                 string n = query[0];
                 if (!name.Equals(""))
                 {
+                    //User exist
                     return true;
                 }
                 else
                 {
+                    //User does not exist
                     return false;
                 }
             }
             else
             {
-
+                //User does not exist
             }
-
             return false;
         }
-        public static void addUser(string channel, string name)
-        {
-            string sb = string.Format("insert into VIEWERS.{0} (Name, Points, TotalPoints) values (\"{1}\", 0, 0)", channel, name);
-            MySqlWrapper.MakeQuery(sb, "Points");
+
+        ///<summary>Adds user to database if not exists in db</summary>
+        ///<para name="channel">Channel name</para>
+        ///<para name="name">Username</para>
+        ///<returns>Returns true if user is added to db or false is user already exists.</returns>
+        public static bool addUserIfNotExist(string channel, string name) {
+            if(!doesUserExist(channel, name)) {
+                if(addUser(channel, name)) 
+                    return true;
+                else
+                    return false;
+            }
+            else 
+                return false;
         }
+        ///<summary>Adds user to database</summary>
+        ///<para name="channel">Channel name</para>
+        ///<para name="name">Username</para>
+        ///<returns>Returns true if user is added to db or false is user already exists.</returns>
+        public static bool addUser(string channel, string name)
+        {
+            if(!doesUserExist(channel,name)) {
+                string sb = string.Format("insert into VIEWERS.{0} (Name, Points, TotalPoints) values (\"{1}\", 0, 0)", channel, name);
+                MySqlWrapper.MakeQuery(sb, "Points");
+                return true;
+            }
+            else
+                return false;
+
+        }
+
+        ///<summary>Use this to get points that user has.</summary>
+        ///<para name="channel">Channel name</para>
+        ///<para name="name">Username</para>
+        ///<returns>Returns points that user has or -1 if something went wrong</returns>
         public static int getPoints(string channel, string name)
         {
             if (doesUserExist(channel, name))
@@ -177,8 +229,10 @@ namespace Bot.Modules.Points
                 string sb = string.Format("select Points from VIEWERS.{0} where Name = \"{1}\"", channel, name);
                 List<string> query = MySqlWrapper.MakeQuery(sb, "Points");
                 int i;
-                Int32.TryParse(query[0], out i);
-                return i;
+                if(Int32.TryParse(query[0], out i))
+                    return i;
+                else 
+                    return -1;
             }
             return -1;
         }
@@ -195,21 +249,27 @@ namespace Bot.Modules.Points
             return -1;
         }
 
-        public static void setPoints(string channel, string name, int points)
+        public static bool setPoints(string channel, string name, int points)
         {
             if (doesUserExist(channel, name))
             {
                 string sb = string.Format("UPDATE VIEWERS.{0} SET Points = {1} WHERE Name = \"{2}\"", channel, points, name);
                 MySqlWrapper.MakeQuery(sb, "Points");
+                return true;
+            } else {
+                return false;
             }
         }
-        public static void setTotalPoints(string channel, string name, int points)
+        public static bool setTotalPoints(string channel, string name, int points)
         {
             if (doesUserExist(channel, name))
             {
                 string sb = string.Format("UPDATE VIEWERS.{0} SET TotalPoints = {1} WHERE Name = \"{2}\"", channel, points, name);
                 MySqlWrapper.MakeQuery(sb, "TotalPoints");
-            }
+                return true;
+            } 
+            else
+                return false;
         }
         private void HandlePoints()
         {

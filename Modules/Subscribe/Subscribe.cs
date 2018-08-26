@@ -35,7 +35,6 @@ namespace Bot.Modules.Subscribe
             }
             else if (msg.StartsWith("!unsub") /* & sender.Equals(channel) */)
             {
-                Console.WriteLine(1);
                 string[] temp = msg.Split(' ');
                 if (temp.Length >= 2)
                 {
