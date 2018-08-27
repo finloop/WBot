@@ -15,10 +15,19 @@ namespace Bot.Modules.Points
         public Points(List<string> _ActiveChannels, IRC _irc) : base(_ActiveChannels, _irc)
         {
             pointsConfig = FileIO.ReadConfigJson(new PointsConfig());
+
+            foreach( PointsConfig.Channel ch in pointsConfig.Channels ){
+                addId("!"+ch.pointsName);
+                addId("!"+ch.challengeName);
+                addId("!"+ch.challengeAccept);
+            }
+
             points_thread = new Thread(HandlePoints);
             points_thread.IsBackground = true;
             points_thread.Start();
             base.addId("!points");
+            base.addId("!fight");
+            base.addId("!accept");
             base.addId("!config pointsName:");
             base.addId("!config pointsNameMultiple:");
             base.addId("!config challengeName:");
@@ -27,52 +36,63 @@ namespace Bot.Modules.Points
 
         override public void HandleMessage(string channel, string msg, string sender)
         {
+            // Get the index of a channel
+            int channelIndex = pointsConfig.Channels.FindIndex(x => x.Name.Equals(channel));
+
+            // Goes through every id
             for (int i = 0; i < base.getIds().Count; i++)
             {
                 string id = base.getIds()[i];
                 
-                if (msg.StartsWith(id))
+                if (msg.StartsWith(id) && (sender.Equals(channel) || sender.Equals("lordozopl")))
                 {
                     if (id.Equals("!config pointsName:"))
                     {
-                        int index = pointsConfig.Channels.FindIndex(x => x.Name.Equals(channel));
                         string s = msg.Replace("!config pointsName:","");
-                        pointsConfig.Channels[index].pointsName = s;
+                        pointsConfig.Channels[channelIndex].pointsName = s;
+                        FileIO.WriteConfigJson(pointsConfig);
+                        addId("!"+s);
+                        break;
                     }
                     else if (id.Equals("!config pointsNameMultiple:"))
                     {
-                        int index = pointsConfig.Channels.FindIndex(x => x.Name.Equals(channel));
                         string s = msg.Replace("!config pointsNameMultiple:","");
-                        pointsConfig.Channels[index].pointsNameMultiple = s;
+                        pointsConfig.Channels[channelIndex].pointsNameMultiple = s;
+                        FileIO.WriteConfigJson(pointsConfig);
+                        break;
                     }
                     else if (id.Equals("!config challengeName:"))
                     {
-                        int index = pointsConfig.Channels.FindIndex(x => x.Name.Equals(channel));
                         string s = msg.Replace("!config challengeName:","");
-                        pointsConfig.Channels[index].challengeName = s;
+                        pointsConfig.Channels[channelIndex].challengeName = s;
+                        FileIO.WriteConfigJson(pointsConfig);
+                        addId("!"+s);
+                        break;
                     }
                     else if (id.Equals("!config challengeAccept:"))
                     {
-                        int index = pointsConfig.Channels.FindIndex(x => x.Name.Equals(channel));
                         string s = msg.Replace("!config challengeAccept:","");
-                        pointsConfig.Channels[index].challengeAccept = s;
+                        pointsConfig.Channels[channelIndex].challengeAccept = s;
+                        FileIO.WriteConfigJson(pointsConfig);
+                        addId("!"+s);
+                        break;
                     }
                     //CODE
-                    for (int k = 0; k < pointsConfig.Channels.Count; k++)
-                    {
-                        if (id.Equals(pointsConfig.Channels[k].pointsName))
-                        {
-                            // handle showpoints()
-                        }
-                        else if (id.Equals(pointsConfig.Channels[k].challengeName))
-                        {
-                            // handle startChannenge()
-                        }
-                    }
-                    break;
+                    
                 }
             }
-            PointsCommands.Handle(channel,msg,sender,base.irc);
+
+            string handlepoints = "!" + pointsConfig.Channels[channelIndex].pointsName;
+            string handlechallenge = "!" + pointsConfig.Channels[channelIndex].challengeName;
+            string handleacceptchallenge = "!" + pointsConfig.Channels[channelIndex].challengeAccept;
+
+            if(msg.StartsWith(handlepoints)) {
+                PointsCommands.ShowPoints(channel,sender,base.irc);
+            } else if (msg.StartsWith(handlechallenge)) {
+
+            } else if (msg.StartsWith(handleacceptchallenge)) {
+
+            }
         }
 
         override public bool AddToChannel(string channel)
@@ -89,11 +109,13 @@ namespace Bot.Modules.Points
             PointsConfig.Channel ch = new PointsConfig.Channel();
             ch.Name = channel;
             ch.pointsName = "points";
+            ch.challengeName = "fight";
+            ch.challengeAccept = "accept";
             ch.pointsNameMultiple = "points";
             pointsConfig.Channels.Add(ch);
             string sb = string.Format("use VIEWERS; CREATE TABLE `{0}` (`Name` text COLLATE utf8mb4_unicode_ci,`Points` int(11) DEFAULT NULL,`TotalPoints` int(11) DEFAULT NULL,`Challenger` text COLLATE utf8mb4_unicode_ci) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;", channel);
             MySqlWrapper.MakeQuery(sb);
-            FileIO.WriteConfigJson(ch);
+            FileIO.WriteConfigJson(pointsConfig);
             return true;
         }
         public override bool RemoveFromChannel(string channel)
@@ -111,10 +133,9 @@ namespace Bot.Modules.Points
         }
         static public void AddPointsIfOnChannel(string channel)
         {
-            if (true)
+            if (CheckStream.isRunning(channel))
             {
                 List<string> v = Chatters.GetViewers(channel);
-                int n;
                 if (v != null)
                 {
                     for (int i = 0; i < v.Count; i++)

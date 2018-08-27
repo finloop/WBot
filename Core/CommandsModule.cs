@@ -61,7 +61,9 @@ namespace Bot
         public virtual void HandleMessage(string channel, string msg, string sender) { }
 
         public void addId(string id) {
-            ids.Add(id);
+            int i = ids.FindIndex(x => x.Equals(id));
+            if(i == -1)
+                ids.Add(id);
         }
         
         #region CONSTRUCTORS

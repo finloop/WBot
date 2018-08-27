@@ -95,6 +95,7 @@ namespace Bot.Core
             public List<String> channels { get; set; }
             public string botName { get; set; }
             public string oauth { get; set; }
+            public string clientID {get; set;}
             public int port { get; set; }
             public string ip { get; set; }
         }
