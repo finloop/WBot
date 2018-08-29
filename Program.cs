@@ -6,6 +6,7 @@ using Bot.Extensions.MySql;
 using Bot.Extensions.Debug;
 using Bot.Extensions.CommandLine;
 using Bot.Modules.Points;
+using Bot.Extensions.Random;
 
 namespace Bot
 {

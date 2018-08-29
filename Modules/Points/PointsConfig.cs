@@ -18,6 +18,7 @@ namespace Bot.Modules.Points
             public string pointsNameMultiple { get; set; }
             public string challengeName { get; set; }
             public string challengeAccept { get; set; }
+            public string rouletteName {get; set;}
         }
     }
 }

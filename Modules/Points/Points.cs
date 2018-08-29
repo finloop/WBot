@@ -20,6 +20,7 @@ namespace Bot.Modules.Points
                 addId("!"+ch.pointsName);
                 addId("!"+ch.challengeName);
                 addId("!"+ch.challengeAccept);
+                addId("!"+ch.rouletteName);
             }
 
             points_thread = new Thread(HandlePoints);
@@ -28,10 +29,12 @@ namespace Bot.Modules.Points
             base.addId("!points");
             base.addId("!fight");
             base.addId("!accept");
+            base.addId("!roulette");
             base.addId("!config pointsName:");
-            base.addId("!config pointsNameMultiple:");
+            base.addId("!config pointsMultipleName:");
             base.addId("!config challengeName:");
             base.addId("!config challengeAccept:");
+            base.addId("!config rouletteName:");
         }
 
         override public void HandleMessage(string channel, string msg, string sender)
@@ -54,9 +57,9 @@ namespace Bot.Modules.Points
                         addId("!"+s);
                         break;
                     }
-                    else if (id.Equals("!config pointsNameMultiple:"))
+                    else if (id.Equals("!config pointsMultipleName:"))
                     {
-                        string s = msg.Replace("!config pointsNameMultiple:","");
+                        string s = msg.Replace("!config pointsMultipleName:","");
                         pointsConfig.Channels[channelIndex].pointsNameMultiple = s;
                         FileIO.WriteConfigJson(pointsConfig);
                         break;
@@ -77,6 +80,14 @@ namespace Bot.Modules.Points
                         addId("!"+s);
                         break;
                     }
+                    else if (id.Equals("!config rouletteName:"))
+                    {
+                        string s = msg.Replace("!config rouletteName:","");
+                        pointsConfig.Channels[channelIndex].rouletteName = s;
+                        FileIO.WriteConfigJson(pointsConfig);
+                        addId("!"+s);
+                        break;
+                    }
                     //CODE
                     
                 }
@@ -85,9 +96,10 @@ namespace Bot.Modules.Points
             string handlepoints = "!" + pointsConfig.Channels[channelIndex].pointsName;
             string handlechallenge = "!" + pointsConfig.Channels[channelIndex].challengeName;
             string handleacceptchallenge = "!" + pointsConfig.Channels[channelIndex].challengeAccept;
+            string handleroulette = "!" + pointsConfig.Channels[channelIndex].rouletteName;
 
             if(msg.StartsWith(handlepoints)) {
-                PointsCommands.ShowPoints(channel,sender,base.irc);
+                PointsCommands.HandleShowPoints(channel, sender, msg, irc);
             } else if (msg.StartsWith(handlechallenge)) {
 
             } else if (msg.StartsWith(handleacceptchallenge)) {
