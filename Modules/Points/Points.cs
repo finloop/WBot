@@ -104,6 +104,8 @@ namespace Bot.Modules.Points
 
             } else if (msg.StartsWith(handleacceptchallenge)) {
 
+            } else if (msg.StartsWith(handleroulette)) {
+                PointsCommands.HandleRoulette(channel, sender, msg, irc);
             }
         }
 
@@ -124,6 +126,7 @@ namespace Bot.Modules.Points
             ch.challengeName = "fight";
             ch.challengeAccept = "accept";
             ch.pointsNameMultiple = "points";
+            ch.rouletteName = "roulette";
             pointsConfig.Channels.Add(ch);
             string sb = string.Format("use VIEWERS; CREATE TABLE `{0}` (`Name` text COLLATE utf8mb4_unicode_ci,`Points` int(11) DEFAULT NULL,`TotalPoints` int(11) DEFAULT NULL,`Challenger` text COLLATE utf8mb4_unicode_ci) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;", channel);
             MySqlWrapper.MakeQuery(sb);
