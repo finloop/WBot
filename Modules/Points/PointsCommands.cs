@@ -11,6 +11,29 @@ namespace Bot.Modules.Points
 {
     public class PointsCommands
     {
+        public static void HandleStartHallenge(string channel, string sender, string msg, IRC irc) {
+            // pattern is: !challenge user int(points)
+            // m[1] - user 
+            // [2] - points
+            string[] m = msg.Split(" ");
+            int points;
+            if(m.Length >= 3) {
+                if(!Points.isUserChallenged(channel, m[1]) && Int32.TryParse(m[2], out points)) {
+                    if(points > 0) {
+                        Points.setChallenger(channel, sender, m[1], points);
+                        irc.SendChatMessage(channel, string.Format("{0} wyzwał na pojedynek {1} wpisz !{2} aby akceptować pojedynek", sender, m[1], Points.pointsConfig.getChannelByName(channel).challengeAccept));
+                        return;
+                    }
+
+                } else {
+                    irc.SendChatMessage(channel, "Coś poszło nie tak monkaS");
+                    return;
+                }
+            } else {
+                irc.SendChatMessage(channel, "Polecenie wpisane niepoprawnie.");
+                return;
+            }
+        }
         public static void HandleShowPoints(string channel, string sender, string msg, IRC irc)
         {
             string[] m = msg.Split(' ');
@@ -113,7 +136,6 @@ namespace Bot.Modules.Points
 
             }
         }
-
         public static void Roulette(string channel, string name, int points, IRC irc)
         {
             int r = RandomN.getRandomUnsignedIntFromRange(0, 1);

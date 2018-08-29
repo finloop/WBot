@@ -16,18 +16,19 @@ namespace Bot.Modules.Points
         {
             pointsConfig = FileIO.ReadConfigJson(new PointsConfig());
 
-            foreach( PointsConfig.Channel ch in pointsConfig.Channels ){
-                addId("!"+ch.pointsName);
-                addId("!"+ch.challengeName);
-                addId("!"+ch.challengeAccept);
-                addId("!"+ch.rouletteName);
+            foreach (PointsConfig.Channel ch in pointsConfig.Channels)
+            {
+                addId("!" + ch.pointsName);
+                addId("!" + ch.challengeName);
+                addId("!" + ch.challengeAccept);
+                addId("!" + ch.rouletteName);
             }
 
             points_thread = new Thread(HandlePoints);
             points_thread.IsBackground = true;
             points_thread.Start();
             base.addId("!points");
-            base.addId("!fight");
+            base.addId("!challenge");
             base.addId("!accept");
             base.addId("!roulette");
             base.addId("!config pointsName:");
@@ -46,50 +47,50 @@ namespace Bot.Modules.Points
             for (int i = 0; i < base.getIds().Count; i++)
             {
                 string id = base.getIds()[i];
-                
+
                 if (msg.StartsWith(id) && (sender.Equals(channel) || sender.Equals("lordozopl")))
                 {
                     if (id.Equals("!config pointsName:"))
                     {
-                        string s = msg.Replace("!config pointsName:","");
+                        string s = msg.Replace("!config pointsName:", "");
                         pointsConfig.Channels[channelIndex].pointsName = s;
                         FileIO.WriteConfigJson(pointsConfig);
-                        addId("!"+s);
+                        addId("!" + s);
                         break;
                     }
                     else if (id.Equals("!config pointsMultipleName:"))
                     {
-                        string s = msg.Replace("!config pointsMultipleName:","");
+                        string s = msg.Replace("!config pointsMultipleName:", "");
                         pointsConfig.Channels[channelIndex].pointsNameMultiple = s;
                         FileIO.WriteConfigJson(pointsConfig);
                         break;
                     }
                     else if (id.Equals("!config challengeName:"))
                     {
-                        string s = msg.Replace("!config challengeName:","");
+                        string s = msg.Replace("!config challengeName:", "");
                         pointsConfig.Channels[channelIndex].challengeName = s;
                         FileIO.WriteConfigJson(pointsConfig);
-                        addId("!"+s);
+                        addId("!" + s);
                         break;
                     }
                     else if (id.Equals("!config challengeAccept:"))
                     {
-                        string s = msg.Replace("!config challengeAccept:","");
+                        string s = msg.Replace("!config challengeAccept:", "");
                         pointsConfig.Channels[channelIndex].challengeAccept = s;
                         FileIO.WriteConfigJson(pointsConfig);
-                        addId("!"+s);
+                        addId("!" + s);
                         break;
                     }
                     else if (id.Equals("!config rouletteName:"))
                     {
-                        string s = msg.Replace("!config rouletteName:","");
+                        string s = msg.Replace("!config rouletteName:", "");
                         pointsConfig.Channels[channelIndex].rouletteName = s;
                         FileIO.WriteConfigJson(pointsConfig);
-                        addId("!"+s);
+                        addId("!" + s);
                         break;
                     }
                     //CODE
-                    
+
                 }
             }
 
@@ -98,13 +99,20 @@ namespace Bot.Modules.Points
             string handleacceptchallenge = "!" + pointsConfig.Channels[channelIndex].challengeAccept;
             string handleroulette = "!" + pointsConfig.Channels[channelIndex].rouletteName;
 
-            if(msg.StartsWith(handlepoints)) {
+            if (msg.StartsWith(handlepoints))
+            {
                 PointsCommands.HandleShowPoints(channel, sender, msg, irc);
-            } else if (msg.StartsWith(handlechallenge)) {
+            }
+            else if (msg.StartsWith(handlechallenge))
+            {
+                PointsCommands.HandleStartHallenge(channel, sender, msg, irc);
+            }
+            else if (msg.StartsWith(handleacceptchallenge))
+            {
 
-            } else if (msg.StartsWith(handleacceptchallenge)) {
-
-            } else if (msg.StartsWith(handleroulette)) {
+            }
+            else if (msg.StartsWith(handleroulette))
+            {
                 PointsCommands.HandleRoulette(channel, sender, msg, irc);
             }
         }
@@ -123,12 +131,12 @@ namespace Bot.Modules.Points
             PointsConfig.Channel ch = new PointsConfig.Channel();
             ch.Name = channel;
             ch.pointsName = "points";
-            ch.challengeName = "fight";
+            ch.challengeName = "challenge";
             ch.challengeAccept = "accept";
             ch.pointsNameMultiple = "points";
             ch.rouletteName = "roulette";
             pointsConfig.Channels.Add(ch);
-            string sb = string.Format("use VIEWERS; CREATE TABLE `{0}` (`Name` text COLLATE utf8mb4_unicode_ci,`Points` int(11) DEFAULT NULL,`TotalPoints` int(11) DEFAULT NULL,`Challenger` text COLLATE utf8mb4_unicode_ci) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;", channel);
+            string sb = string.Format("use VIEWERS; CREATE TABLE `{0}` (`Name` text COLLATE utf8mb4_unicode_ci,`Points` int(11) DEFAULT 0,`TotalPoints` int(11) DEFAULT 0,`Challenger` text COLLATE utf8mb4_unicode_ci DEFAULT '', `ChallPoints` int(11) DEFAULT 0) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;", channel);
             MySqlWrapper.MakeQuery(sb);
             FileIO.WriteConfigJson(pointsConfig);
             return true;
@@ -155,7 +163,7 @@ namespace Bot.Modules.Points
                 {
                     for (int i = 0; i < v.Count; i++)
                     {
-                        if (doesUserExist(channel, v[i]))
+                        if (addUserIfNotExist(channel, v[i]))
                         {
                             addPoints(channel, v[i], 1);
                         }
@@ -180,18 +188,21 @@ namespace Bot.Modules.Points
         public static bool removePoints(string channel, string name, int points)
         {
             int _points = getPoints(channel, name);
-            if(points >= _points) {
-                if(setPoints(channel, name, 0))
+            if (points >= _points)
+            {
+                if (setPoints(channel, name, 0))
                     return true;
-                else 
-                    return false;
-            } else {
-                if(setPoints(channel, name, _points - points))
-                    return true;
-                else 
+                else
                     return false;
             }
-            
+            else
+            {
+                if (setPoints(channel, name, _points - points))
+                    return true;
+                else
+                    return false;
+            }
+
         }
 
         ///<summary>Checks if user exits in database.</summary>
@@ -218,23 +229,96 @@ namespace Bot.Modules.Points
             }
             else
             {
-                //User does not exist
+                return false;
             }
-            return false;
+        }
+
+        public static bool isUserChallenged(string channel, string name)
+        {
+            if (doesUserExist(channel, name))
+            {
+                string fill = string.Format("select Challenger from VIEWERS.{0} where Name = \"{1}\"", channel, name);
+                List<string> query = MySqlWrapper.MakeQuery(fill, "Challenger");
+                if (query.Count > 0)
+                {
+                    string n = query[0];
+                    if (name == null || name.Equals(""))
+                    {
+                        //User is not challenged
+                        return false;
+                    }
+                    else
+                    {
+                        //User is challenged
+                        return true;
+                    }
+                }
+                else
+                {
+                    return false;
+                }
+            }
+            else
+            {
+                return false;
+            }
+        }
+
+        ///<summary>Returns a challenger or empty string like "" if something went wrong.</summary>
+        public static string getChallenger(string channel, string name)
+        {
+            if (isUserChallenged(channel, name))
+            {
+
+                string sb = string.Format("select Challenger from VIEWERS.{0} where Name = \"{1}\"", channel, name);
+                List<string> query = MySqlWrapper.MakeQuery(sb, "Challenger");
+                if (query.Count > 0)
+                {
+                    return query[0];
+                } else {
+                    return "";
+                }
+            }
+            else
+            {
+                return "";
+            }
+        }
+
+        ///<summary>Sets challenger field</summary>
+        ///<para name="challenger">Your name</para>
+        ///<para name="challenged">Name of person your're challenging.</para>
+        public static bool setChallenger(string channel, string challenger, string challenged, int points)
+        {
+            if (doesUserExist(channel, challenged) && doesUserExist(channel, challenger))
+            {
+                string sb = string.Format("UPDATE VIEWERS.{0} SET Challenger = {1} WHERE Name = \"{2}\"", channel, challenger, challenged);
+                MySqlWrapper.MakeQuery(sb, "Challenger");
+
+                string sb2 = string.Format("UPDATE VIEWERS.{0} SET ChallPoints = {1} WHERE Name = \"{2}\"", channel, points, challenged);
+                MySqlWrapper.MakeQuery(sb2, "ChallPoints");
+                return true;
+            }
+            else
+            {
+                return false;
+            }
         }
 
         ///<summary>Adds user to database if not exists in db</summary>
         ///<para name="channel">Channel name</para>
         ///<para name="name">Username</para>
         ///<returns>Returns true if user is added to db or false is user already exists.</returns>
-        public static bool addUserIfNotExist(string channel, string name) {
-            if(!doesUserExist(channel, name)) {
-                if(addUser(channel, name)) 
+        public static bool addUserIfNotExist(string channel, string name)
+        {
+            if (!doesUserExist(channel, name))
+            {
+                if (addUser(channel, name))
                     return true;
                 else
                     return false;
             }
-            else 
+            else
                 return false;
         }
         ///<summary>Adds user to database</summary>
@@ -243,7 +327,8 @@ namespace Bot.Modules.Points
         ///<returns>Returns true if user is added to db or false is user already exists.</returns>
         public static bool addUser(string channel, string name)
         {
-            if(!doesUserExist(channel,name)) {
+            if (!doesUserExist(channel, name))
+            {
                 string sb = string.Format("insert into VIEWERS.{0} (Name, Points, TotalPoints) values (\"{1}\", 0, 0)", channel, name);
                 MySqlWrapper.MakeQuery(sb, "Points");
                 return true;
@@ -265,9 +350,9 @@ namespace Bot.Modules.Points
                 string sb = string.Format("select Points from VIEWERS.{0} where Name = \"{1}\"", channel, name);
                 List<string> query = MySqlWrapper.MakeQuery(sb, "Points");
                 int i;
-                if(Int32.TryParse(query[0], out i))
+                if (Int32.TryParse(query[0], out i))
                     return i;
-                else 
+                else
                     return -1;
             }
             return -1;
@@ -292,7 +377,9 @@ namespace Bot.Modules.Points
                 string sb = string.Format("UPDATE VIEWERS.{0} SET Points = {1} WHERE Name = \"{2}\"", channel, points, name);
                 MySqlWrapper.MakeQuery(sb, "Points");
                 return true;
-            } else {
+            }
+            else
+            {
                 return false;
             }
         }
@@ -303,7 +390,7 @@ namespace Bot.Modules.Points
                 string sb = string.Format("UPDATE VIEWERS.{0} SET TotalPoints = {1} WHERE Name = \"{2}\"", channel, points, name);
                 MySqlWrapper.MakeQuery(sb, "TotalPoints");
                 return true;
-            } 
+            }
             else
                 return false;
         }
