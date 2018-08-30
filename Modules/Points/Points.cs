@@ -242,7 +242,7 @@ namespace Bot.Modules.Points
                 if (query.Count > 0)
                 {
                     string n = query[0];
-                    if (name == null || name.Equals(""))
+                    if (n == null || n.Equals(""))
                     {
                         //User is not challenged
                         return false;
@@ -292,7 +292,24 @@ namespace Bot.Modules.Points
         {
             if (doesUserExist(channel, challenged) && doesUserExist(channel, challenger))
             {
-                string sb = string.Format("UPDATE VIEWERS.{0} SET Challenger = {1} WHERE Name = \"{2}\"", channel, challenger, challenged);
+                string sb = string.Format("UPDATE VIEWERS.{0} SET Challenger = \"{1}\" WHERE Name = \"{2}\"", channel, challenger, challenged);
+                MySqlWrapper.MakeQuery(sb, "Challenger");
+
+                string sb2 = string.Format("UPDATE VIEWERS.{0} SET ChallPoints = {1} WHERE Name = \"{2}\"", channel, points, challenged);
+                MySqlWrapper.MakeQuery(sb2, "ChallPoints");
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+
+        public static bool clearChallenger(string channel, string challenger, string challenged, int points)
+        {
+            if (doesUserExist(channel, challenged))
+            {
+                string sb = string.Format("UPDATE VIEWERS.{0} SET Challenger = \"{1}\" WHERE Name = \"{2}\"", channel, challenger, challenged);
                 MySqlWrapper.MakeQuery(sb, "Challenger");
 
                 string sb2 = string.Format("UPDATE VIEWERS.{0} SET ChallPoints = {1} WHERE Name = \"{2}\"", channel, points, challenged);

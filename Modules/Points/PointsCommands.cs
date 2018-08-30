@@ -22,6 +22,7 @@ namespace Bot.Modules.Points
                     if(points > 0) {
                         Points.setChallenger(channel, sender, m[1], points);
                         irc.SendChatMessage(channel, string.Format("{0} wyzwał na pojedynek {1} wpisz !{2} aby akceptować pojedynek", sender, m[1], Points.pointsConfig.getChannelByName(channel).challengeAccept));
+                        StartCancelThread(channel, m[1], 30000);
                         return;
                     }
 
@@ -55,6 +56,24 @@ namespace Bot.Modules.Points
             {
                 ShowPoints(channel, sender, irc);
             }
+        }
+
+        public static void CancelChallenge(string channel, string name) {
+            Points.clearChallenger(channel,"", name, 0);
+            Log.WriteLine("Clearing chall from " + name);
+        }
+
+        public static void CancelChallengeAfterSeconds(string channel, string name, int timeout) {
+            Log.WriteLine("Preparing to clear.. " + name);
+            Thread.Sleep(timeout);
+            Points.clearChallenger(channel,"", name, 0);
+            Log.WriteLine("Clearing chall from " + name);
+        }
+
+        private static void StartCancelThread(string channel, string name, int timeout) {
+            Thread t = new Thread(() => CancelChallengeAfterSeconds(channel, name, timeout));
+            t.IsBackground = true;
+            t.Start();
         }
         public static void ShowPoints(string channel, string sender, IRC irc)
         {
