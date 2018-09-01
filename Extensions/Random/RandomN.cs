@@ -15,7 +15,6 @@ namespace Bot.Extensions.Random
                 randomInteger *= -1;
             return randomInteger;
         }
-
         ///<summary>Retruns a random int within range.Including max number.</summary>
         public static int getRandomUnsignedIntFromRange(int min, int max)
         {

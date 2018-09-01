@@ -17,7 +17,7 @@ namespace Bot.Extensions.Stream
         {
             String text;
             WebClient web = new WebClient();
-            System.IO.Stream stream = web.OpenRead("https://api.twitch.tv/kraken/streams/"+channel+"?client_id=q6batx0epp608isickayubi39itsckt");
+            System.IO.Stream stream = web.OpenRead("https://api.twitch.tv/kraken/streams/" + channel + "?client_id=q6batx0epp608isickayubi39itsckt");
             using (System.IO.StreamReader reader = new System.IO.StreamReader(stream))
             {
                 text = reader.ReadToEnd();
@@ -30,21 +30,22 @@ namespace Bot.Extensions.Stream
             if (json.stream == null)
                 return false;
             else
-                return true;   
+                return true;
         }
 
         static public TimeSpan Uptime(string channel)
         {
-            if(isRunning(channel))
+            if (isRunning(channel))
             {
                 TimeSpan dateTime = DateTime.UtcNow - json.stream.created_at;
                 int sec = (int)dateTime.TotalSeconds;
                 int hours = sec / 3600;
-                int min = (sec % 3600) /60;
+                int min = (sec % 3600) / 60;
                 sec = (sec % 3600) - min * 60;
-                
+
                 return dateTime;
-            } else
+            }
+            else
             {
                 return TimeSpan.Zero;
             }
@@ -64,9 +65,9 @@ namespace Bot.Extensions.Stream
             public string follows { get; set; } = null;
             public string commercial { get; set; } = null;
             public string stream_key { get; set; } = null;
-            public string chat { get; set; } = null; 
-            public string features { get; set; } = null; 
-            public string subscriptions { get; set; } = null; 
+            public string chat { get; set; } = null;
+            public string features { get; set; } = null;
+            public string subscriptions { get; set; } = null;
             public string editors { get; set; } = null;
             public string teams { get; set; } = null;
             public string videos { get; set; } = null;

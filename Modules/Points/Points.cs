@@ -43,6 +43,12 @@ namespace Bot.Modules.Points
             // Get the index of a channel
             int channelIndex = pointsConfig.Channels.FindIndex(x => x.Name.Equals(channel));
 
+            if(MySqlWrapper.checkForSQLInjection(channel) || MySqlWrapper.checkForSQLInjection(msg) || MySqlWrapper.checkForSQLInjection(sender)) {
+                Log.WriteLine(string.Format("Prevented sql injection. Channel: \t{0}\n \t{1}\n \t{2}\n ", channel, msg, sender));
+                return;
+            }
+
+
             // Goes through every id
             for (int i = 0; i < base.getIds().Count; i++)
             {

@@ -65,14 +65,6 @@ namespace Bot.Core
                     temp.Add(channels.listOfChannels[i].Name);
                 }
             }
-
-            /* 
-             * DEBUG: print list of channels implementing module
-             *
-            for(int i = 0; i < temp.Count; i++) {
-                Console.WriteLine(temp[i]);
-            } 
-            */
             return temp;
         }
 
@@ -85,40 +77,59 @@ namespace Bot.Core
                 // Check every commandModule 
                 for (int i = 0; i < commandsModules.Count; i++)
                 {
-
                     // Check every command in commmand module
                     List<string> list = commandsModules[i].getIds();
                     for (int k = 0; k < list.Count; k++)
                     {
-
                         if (message.msg.StartsWith(list[k]) & ((channels.FindModuleIndex(channels.listOfChannels[channelindex], commandsModules[i].GetType().ToString())) != -1))
                         {
-
                             commandsModules[i].HandleMessage(message.channel, message.msg, message.sender);
                         }
                     }
-
                 }
             }
 
             for (int i = 0; i < passiveModules.Count; i++)
                 {
-                    
                     // Check every command in commmand module
                     List<string> list = passiveModules[i].getIds();
                     for (int k = 0; k < list.Count; k++)
                     {
-
                         if (message.msg.StartsWith(list[k]))
-                        {
-                            
+                        {       
                             passiveModules[i].HandleMessage(message.channel, message.msg, message.sender);
                         }
                     }
-
                 }
+        }
 
+        public List<string> getCommandModuleIds() {
+            List<string> all = new List<string>();
+            for (int i = 0; i < commandsModules.Count; i++)
+                {
+                    // Check every command in commmand module
+                    List<string> list = commandsModules[i].getIds();
+                    all.AddRange(list);
+                }
+                return all;
+        }
 
+        public List<string> getPassiveModuleIds() {
+            List<string> all = new List<string>();
+            for (int i = 0; i < passiveModules.Count; i++)
+                {
+                    // Check every command in commmand module
+                    List<string> list = passiveModules[i].getIds();
+                    all.AddRange(list);
+                }
+                return all;
+        }
+
+        public List<string> getAllIds() {
+            List<string> all = new List<string>();
+            all.AddRange(getCommandModuleIds());
+            all.AddRange(getPassiveModuleIds());
+            return all;
         }
 
         public void AddModuleToChannel(string channel, string comm)
@@ -183,12 +194,10 @@ namespace Bot.Core
                     int m = commandsModules[k].getActiveChannels().FindIndex(x => x.Equals(channel));
                     if (m != -1)
                     {
-                        Console.WriteLine("Updating channels data....");
                         channels.AddModuleToChannel(channel, commandsModules[k].GetType().ToString());
                     }
                 }
             }
-            Console.WriteLine("Finished updating channels...");
             FileIO.WriteConfigJson(channels);
         }
     }
