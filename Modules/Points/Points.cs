@@ -105,11 +105,11 @@ namespace Bot.Modules.Points
             }
             else if (msg.StartsWith(handlechallenge))
             {
-                PointsCommands.HandleStartHallenge(channel, sender, msg, irc);
+                PointsCommands.HandleStartChallenge(channel, sender, msg, irc);
             }
             else if (msg.StartsWith(handleacceptchallenge))
             {
-
+                PointsCommands.HandleEndChallenge(channel, sender, msg, irc);
             }
             else if (msg.StartsWith(handleroulette))
             {
@@ -282,6 +282,27 @@ namespace Bot.Modules.Points
             else
             {
                 return "";
+            }
+        }
+
+        public static int getChallPoints(string channel, string name)
+        {
+            if (isUserChallenged(channel, name))
+            {
+
+                string sb = string.Format("select ChallPoints from VIEWERS.{0} where Name = \"{1}\"", channel, name);
+                List<string> query = MySqlWrapper.MakeQuery(sb, "ChallPoints");
+                if (query.Count > 0)
+                {
+                    int i = Int32.Parse(query[0]);
+                    return i;
+                } else {
+                    return -1;
+                }
+            }
+            else
+            {
+                return -1;
             }
         }
 

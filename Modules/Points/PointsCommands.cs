@@ -11,7 +11,7 @@ namespace Bot.Modules.Points
 {
     public class PointsCommands
     {
-        public static void HandleStartHallenge(string channel, string sender, string msg, IRC irc) {
+        public static void HandleStartChallenge(string channel, string sender, string msg, IRC irc) {
             // pattern is: !challenge user int(points)
             // m[1] - user 
             // [2] - points
@@ -20,6 +20,15 @@ namespace Bot.Modules.Points
             if(m.Length >= 3) {
                 if(!Points.isUserChallenged(channel, m[1]) && Int32.TryParse(m[2], out points)) {
                     if(points > 0) {
+                        if(points > Points.getPoints(channel, sender)) {
+                            irc.SendChatMessage(channel, string.Format("{0} ma za mało {1}", sender, Points.pointsConfig.getChannelByName(channel).pointsNameMultiple));
+                            return;
+                        }
+                        if(points > Points.getPoints(channel, m[1])) {
+                            irc.SendChatMessage(channel, string.Format("{0} ma za mało {1}", m[1], Points.pointsConfig.getChannelByName(channel).pointsNameMultiple));
+                            return;
+                        }
+
                         Points.setChallenger(channel, sender, m[1], points);
                         irc.SendChatMessage(channel, string.Format("{0} wyzwał na pojedynek {1} wpisz !{2} aby akceptować pojedynek", sender, m[1], Points.pointsConfig.getChannelByName(channel).challengeAccept));
                         StartCancelThread(channel, m[1], 30000);
@@ -33,6 +42,27 @@ namespace Bot.Modules.Points
             } else {
                 irc.SendChatMessage(channel, "Polecenie wpisane niepoprawnie.");
                 return;
+            }
+        }
+
+        public static void HandleEndChallenge(string channel, string sender, string msg, IRC irc) {
+            string whostartedchall = Points.getChallenger(channel, sender);
+            if(!whostartedchall.Equals("")) {
+                int r = RandomN.getRandomUnsignedIntFromRange(0,1);
+                int points = Points.getChallPoints(channel, sender);
+                if(r == 0) {
+                    Points.removePoints(channel, sender, points);
+                    Points.addPoints(channel, whostartedchall, points);
+                    irc.SendChatMessage(channel, string.Format("{0} wygrywa pojedynek z {1} PogChamp i wygrywa {2} {3}", whostartedchall, sender, points, Points.pointsConfig.getChannelByName(channel).pointsNameMultiple));
+                    CancelChallenge(channel, sender);
+                } else if(r == 1) {
+                    Points.removePoints(channel, whostartedchall, points);  
+                    Points.addPoints(channel, sender, points);
+                    irc.SendChatMessage(channel, string.Format("{0} wygrywa pojedynek z {1} PogChamp i wygrywa {2} {3}", sender, whostartedchall, points, Points.pointsConfig.getChannelByName(channel).pointsNameMultiple));
+                    CancelChallenge(channel, sender);
+                }
+            } else {
+                irc.SendChatMessage(channel, "Polecenie wpisane niepoprawnie.");
             }
         }
         public static void HandleShowPoints(string channel, string sender, string msg, IRC irc)
@@ -157,6 +187,10 @@ namespace Bot.Modules.Points
         }
         public static void Roulette(string channel, string name, int points, IRC irc)
         {
+            if(points > Points.getPoints(channel, name))  {
+                irc.SendChatMessage(channel, string.Format("{0} ma za mało {1}", name, Points.pointsConfig.getChannelByName(channel).pointsNameMultiple));
+                return;
+            }
             int r = RandomN.getRandomUnsignedIntFromRange(0, 1);
             if (r == 0)
             {
