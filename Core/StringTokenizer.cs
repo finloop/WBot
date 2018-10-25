@@ -8,8 +8,7 @@ namespace Bot.Core
     {
         // returns [sender, channel, message]
         public static List<string> TokenizeChatMsg(string message)
-        {
-        
+        {  
             List<string> vs = new List<string>();
             int intIndexParseSign = message.IndexOf('!');
             vs.Add(message.Substring(1, intIndexParseSign - 1));                                                            

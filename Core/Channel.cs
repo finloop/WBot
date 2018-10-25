@@ -4,10 +4,7 @@ using Bot.Modules.Points;
 
 namespace Bot.Core
 {
-    public class Channels
-    {
-        public List<Channel> listOfChannels = new List<Channel>();
-        public partial class Channel
+        public class Channel
         {
             public string Name { get; set; }
             public List<string> ActiveModules { get; set; }
@@ -25,7 +22,7 @@ namespace Bot.Core
             }
         }
 
-        public void AddModuleToChannel(string channel, string moduleName)
+/*         public void AddModuleToChannel(string channel, string moduleName)
         {
             for (int i = 0; i < listOfChannels.Count; i++)
             {
@@ -61,6 +58,5 @@ namespace Bot.Core
         public void RemoveModuleFromChannel(int channelIndex, string moduleName)
         {
             listOfChannels[channelIndex].ActiveModules.Remove(moduleName);
-        }
-    }
+        } */
 }

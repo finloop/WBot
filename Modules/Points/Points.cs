@@ -11,7 +11,7 @@ namespace Bot.Modules.Points
     public class Points : CommandsModule
     {
         private Thread points_thread;
-        public Points(List<string> _ActiveChannels, IRC _irc) : base(_ActiveChannels, _irc)
+        public Points(IRC _irc) : base(_irc)
         {
             moduleName = "Bot.Modules.Points.Points";
 
@@ -385,8 +385,9 @@ namespace Bot.Modules.Points
         {
             while (true)
             {
-                for (int i = 0; i < getActiveChannels().Count; i++)
-                    AddPointsIfOnChannel(getActiveChannels()[i]);
+                foreach(Channel channel in ModuleManager.channels) {
+                    AddPointsIfOnChannel(channel.Name);
+                }
                 Thread.Sleep(30000);
             }
         }

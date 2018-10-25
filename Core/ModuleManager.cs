@@ -50,22 +50,12 @@ namespace Bot.Core
         {
             // Add modules here modules.add(....)
             channels = FileIO.ReadConfigJson(channels);
-            commandsModules.Add(new HelloWorld(getActiveChannels(typeof(HelloWorld).FullName), irc));
-            commandsModules.Add(new Points(getActiveChannels(typeof(Points).FullName), irc));
+            commandsModules.Add(new HelloWorld(irc));
+            commandsModules.Add(new Points(irc));
         }
 
         private void InitializePassiveModules(IRC irc) {
             passiveModules.Add(new Subscribe(this, irc));
-        }
-
-        public List<string> getActiveChannels(string moduleName) {
-            List<string> temp = new List<string>();
-            for(int i = 0; i < channels.listOfChannels.Count; i++) {
-                if(channels.listOfChannels[i].ActiveModules.FindIndex(x => x.Equals(moduleName)) != -1) {
-                    temp.Add(channels.listOfChannels[i].Name);
-                }
-            }
-            return temp;
         }
 
         public void Handle(Message message)
@@ -140,22 +130,21 @@ namespace Bot.Core
                 }
 
             }
-            UpdateChannelsData(channel);
         }
 
         // Join channel's chat
         public void JoinChannel(string channel)
         {
-            int i = channels.listOfChannels.FindIndex(x => x.Name.Equals(channel));
+            int i = channels.FindIndex(x => x.Name.Equals(channel));
             if (i == -1)
-                channels.listOfChannels.Add(new Channels.Channel(channel));
+                channels.Add(new Channel(channel));
         }
 
         public void LeaveChannel(string channel)
         {
-            int i = channels.listOfChannels.FindIndex(x => x.Name.Equals(channel));
+            int i = channels.FindIndex(x => x.Name.Equals(channel));
             if (i != -1)
-                channels.listOfChannels.RemoveAt(channels.listOfChannels.FindIndex(x => x.Name.Equals(channel)));
+                channels.RemoveAt(channels.FindIndex(x => x.Name.Equals(channel)));
         }
 
         public void RemoveModuleFromChannel(string channel, string comm)
@@ -167,33 +156,10 @@ namespace Bot.Core
                 if (k != -1)
                 {
                     commandsModules[i].RemoveFromChannel(channel);
-                    irc.SendChatMessage(channel, "removed" + comm +" to this channel");
+                    irc.SendChatMessage(channel, " removed " + comm +" from this channel");
                 }
 
             }
-            UpdateChannelsData(channel);
-        }
-
-
-
-
-        private void UpdateChannelsData(string channel)
-        {
-            int i = channels.listOfChannels.FindIndex(x => x.Name.Equals(channel));
-            if (i != -1)
-            {
-                channels.listOfChannels[i].ActiveModules.Clear();
-                // Check if modules contain channel name
-                for (int k = 0; k < commandsModules.Count; k++)
-                {
-                    int m = commandsModules[k].getActiveChannels().FindIndex(x => x.Equals(channel));
-                    if (m != -1)
-                    {
-                        channels.AddModuleToChannel(channel, commandsModules[k].GetType().ToString());
-                    }
-                }
-            }
-            FileIO.WriteConfigJson(channels);
         }
     }
 }

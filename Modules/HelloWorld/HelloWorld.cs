@@ -6,7 +6,7 @@ namespace Bot.Modules.HelloWorld
 {
     public class HelloWorld : CommandsModule
     {
-        public HelloWorld(List<string> _ActiveChannels, IRC _irc) : base(_ActiveChannels, _irc) {
+        public HelloWorld(IRC _irc) : base(_irc) {
             base.addId("!hello");
         }
             
