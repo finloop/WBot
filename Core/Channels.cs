@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System;
+using Bot.Modules.Points;
 
 namespace Bot.Core
 {
@@ -10,42 +11,55 @@ namespace Bot.Core
         {
             public string Name { get; set; }
             public List<string> ActiveModules { get; set; }
-
-            public Channel(string _channel) {
+            public PointsConfig pointsConfig { get; set; }
+            public Channel(string _channel)
+            {
                 Name = _channel;
                 ActiveModules = new List<string>();
+                pointsConfig.Name = _channel;
+                pointsConfig.pointsName = "points";
+                pointsConfig.challengeName = "challenge";
+                pointsConfig.challengeAccept = "accept";
+                pointsConfig.pointsNameMultiple = "points";
+                pointsConfig.rouletteName = "roulette";
             }
         }
 
-        public void AddModuleToChannel(string channel, string moduleName) {
-            for(int i = 0; i < listOfChannels.Count; i++) {
-                if(channel.Equals(listOfChannels[i].Name)) {
+        public void AddModuleToChannel(string channel, string moduleName)
+        {
+            for (int i = 0; i < listOfChannels.Count; i++)
+            {
+                if (channel.Equals(listOfChannels[i].Name))
+                {
                     //Console.WriteLine(listOfChannels[i].ActiveModules.FindIndex(x => x.Equals(moduleName)));
-                    if (listOfChannels[i].ActiveModules.FindIndex(x => x.Equals(moduleName)) == -1) {
+                    if (listOfChannels[i].ActiveModules.FindIndex(x => x.Equals(moduleName)) == -1)
+                    {
                         Console.WriteLine("k");
                         listOfChannels[i].ActiveModules.Add(moduleName);
-                        
+
                     }
                 }
             }
         }
 
-        public int FindChannel(string channel) {
+        public int FindChannel(string channel)
+        {
             return listOfChannels.FindIndex(x => x.Name.Equals(channel));
         }
-
-        public int FindModuleIndex(Channel channel, string moduleName) {
+        public int FindModuleIndex(Channel channel, string moduleName)
+        {
             return channel.ActiveModules.FindIndex(x => x.Equals(moduleName));
         }
-
-        public void RemoveModuleFromChannel(Channel channel, string moduleName) {
+        public void RemoveModuleFromChannel(Channel channel, string moduleName)
+        {
             int i = FindModuleIndex(channel, moduleName);
-            if (i!= -1) {
+            if (i != -1)
+            {
                 channel.ActiveModules.Remove(channel.ActiveModules[i]);
             }
         }
-
-        public void RemoveModuleFromChannel(int channelIndex, string moduleName) {
+        public void RemoveModuleFromChannel(int channelIndex, string moduleName)
+        {
             listOfChannels[channelIndex].ActiveModules.Remove(moduleName);
         }
     }

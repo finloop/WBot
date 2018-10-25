@@ -17,9 +17,14 @@ namespace Bot.Core
         {
             Console.WriteLine(message);
 
-            if (message.Contains("PRIVMSG") | message.Contains("WHISPER"))
+            if (message.Contains("WHISPER"))
             {
-                Message msg = new Message(StringTokenizer.TokenizeChatMsg(message));
+                Message msg = new Message(StringTokenizer.TokenizeChatMsg(message), Message.InputId.whisper);
+                moduleManager.messages.TryAdd(msg, 100);      
+            }
+            if (message.Contains("PRIVMSG"))
+            {
+                Message msg = new Message(StringTokenizer.TokenizeChatMsg(message), Message.InputId.irc);
                 moduleManager.messages.TryAdd(msg, 100);      
             }
         }

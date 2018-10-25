@@ -11,18 +11,9 @@ namespace Bot.Modules.Points
     public class Points : CommandsModule
     {
         private Thread points_thread;
-        public static PointsConfig pointsConfig;
         public Points(List<string> _ActiveChannels, IRC _irc) : base(_ActiveChannels, _irc)
         {
-            pointsConfig = FileIO.ReadConfigJson(new PointsConfig());
-
-            foreach (PointsConfig.Channel ch in pointsConfig.Channels)
-            {
-                addId("!" + ch.pointsName);
-                addId("!" + ch.challengeName);
-                addId("!" + ch.challengeAccept);
-                addId("!" + ch.rouletteName);
-            }
+            moduleName = "Bot.Modules.Points.Points";
 
             points_thread = new Thread(HandlePoints);
             points_thread.IsBackground = true;
@@ -38,74 +29,27 @@ namespace Bot.Modules.Points
             base.addId("!config rouletteName:");
         }
 
-        override public void HandleMessage(string channel, string msg, string sender)
+        override public void HandleMessage(Message message)
         {
-            // Get the index of a channel
-            int channelIndex = pointsConfig.Channels.FindIndex(x => x.Name.Equals(channel));
+            String channel = message.channel;
+            String msg = message.msg;
+            String sender = message.sender;
 
-            if(MySqlWrapper.checkForSQLInjection(channel) || MySqlWrapper.checkForSQLInjection(msg) || MySqlWrapper.checkForSQLInjection(sender)) {
+            // Get the index of a channel
+            int channelIndex = ModuleManager.channels.FindIndex(x => x.Name == channel);
+
+            if (MySqlWrapper.checkForSQLInjection(channel) || MySqlWrapper.checkForSQLInjection(msg) || MySqlWrapper.checkForSQLInjection(sender))
+            {
                 Log.WriteLine(string.Format("Prevented sql injection. Channel: \t{0}\n \t{1}\n \t{2}\n ", channel, msg, sender));
                 return;
             }
 
+            string handlepoints = "!" + ModuleManager.channels[channelIndex].pointsConfig.pointsName;
+            string handlechallenge = "!" + ModuleManager.channels[channelIndex].pointsConfig.challengeName;
+            string handleacceptchallenge = "!" + ModuleManager.channels[channelIndex].pointsConfig.challengeAccept;
+            string handleroulette = "!" + ModuleManager.channels[channelIndex].pointsConfig.rouletteName;
 
-            // Goes through every id
-            for (int i = 0; i < base.getIds().Count; i++)
-            {
-                string id = base.getIds()[i];
-
-                if (msg.StartsWith(id) && (sender.Equals(channel) || sender.Equals("lordozopl")))
-                {
-                    if (id.Equals("!config pointsName:"))
-                    {
-                        string s = msg.Replace("!config pointsName:", "");
-                        pointsConfig.Channels[channelIndex].pointsName = s;
-                        FileIO.WriteConfigJson(pointsConfig);
-                        addId("!" + s);
-                        break;
-                    }
-                    else if (id.Equals("!config pointsMultipleName:"))
-                    {
-                        string s = msg.Replace("!config pointsMultipleName:", "");
-                        pointsConfig.Channels[channelIndex].pointsNameMultiple = s;
-                        FileIO.WriteConfigJson(pointsConfig);
-                        break;
-                    }
-                    else if (id.Equals("!config challengeName:"))
-                    {
-                        string s = msg.Replace("!config challengeName:", "");
-                        pointsConfig.Channels[channelIndex].challengeName = s;
-                        FileIO.WriteConfigJson(pointsConfig);
-                        addId("!" + s);
-                        break;
-                    }
-                    else if (id.Equals("!config challengeAccept:"))
-                    {
-                        string s = msg.Replace("!config challengeAccept:", "");
-                        pointsConfig.Channels[channelIndex].challengeAccept = s;
-                        FileIO.WriteConfigJson(pointsConfig);
-                        addId("!" + s);
-                        break;
-                    }
-                    else if (id.Equals("!config rouletteName:"))
-                    {
-                        string s = msg.Replace("!config rouletteName:", "");
-                        pointsConfig.Channels[channelIndex].rouletteName = s;
-                        FileIO.WriteConfigJson(pointsConfig);
-                        addId("!" + s);
-                        break;
-                    }
-                    //CODE
-
-                }
-            }
-
-            string handlepoints = "!" + pointsConfig.Channels[channelIndex].pointsName;
-            string handlechallenge = "!" + pointsConfig.Channels[channelIndex].challengeName;
-            string handleacceptchallenge = "!" + pointsConfig.Channels[channelIndex].challengeAccept;
-            string handleroulette = "!" + pointsConfig.Channels[channelIndex].rouletteName;
-
-            if (msg.StartsWith(handlepoints))
+             if (msg.StartsWith(handlepoints))
             {
                 PointsCommands.HandleShowPoints(channel, sender, msg, irc);
             }
@@ -125,36 +69,31 @@ namespace Bot.Modules.Points
 
         override public bool AddToChannel(string channel)
         {
-            for (int i = 0; i < ActiveChannels.Count; i++)
+            // not sure what toStrng returns
+            int channelIndex = ModuleManager.channels.FindIndex(x => x.Name == channel);
+            // find out if channel exists and module is not added to it, if not added add it
+            if (channelIndex != -1)
             {
-                if (channel.Equals(ActiveChannels[i]))
+                int moduleIndex = ModuleManager.channels[channelIndex].ActiveModules.FindIndex(x => x == moduleName);
+                if (moduleIndex == -1)
                 {
-                    return false;
+                    ModuleManager.channels[channelIndex].ActiveModules.Add(moduleName);
+                    string sb = string.Format("use VIEWERS; CREATE TABLE `{0}` (`Name` text COLLATE utf8mb4_unicode_ci,`Points` int(11) DEFAULT 0,`TotalPoints` int(11) DEFAULT 0,`Challenger` text COLLATE utf8mb4_unicode_ci DEFAULT '', `ChallPoints` int(11) DEFAULT 0) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;", channel);
+                    MySqlWrapper.MakeQuery(sb);
+                    return true;
                 }
             }
-            ActiveChannels.Add(channel);
-
-            PointsConfig.Channel ch = new PointsConfig.Channel();
-            ch.Name = channel;
-            ch.pointsName = "points";
-            ch.challengeName = "challenge";
-            ch.challengeAccept = "accept";
-            ch.pointsNameMultiple = "points";
-            ch.rouletteName = "roulette";
-            pointsConfig.Channels.Add(ch);
-            string sb = string.Format("use VIEWERS; CREATE TABLE `{0}` (`Name` text COLLATE utf8mb4_unicode_ci,`Points` int(11) DEFAULT 0,`TotalPoints` int(11) DEFAULT 0,`Challenger` text COLLATE utf8mb4_unicode_ci DEFAULT '', `ChallPoints` int(11) DEFAULT 0) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;", channel);
-            MySqlWrapper.MakeQuery(sb);
-            FileIO.WriteConfigJson(pointsConfig);
-            return true;
+            return false;
         }
         public override bool RemoveFromChannel(string channel)
         {
-            for (int i = 0; i < ActiveChannels.Count; i++)
-            {
-                if (channel.Equals(ActiveChannels[i]))
-                {
-                    ActiveChannels.Remove(channel);
-                    pointsConfig.Channels.RemoveAt(pointsConfig.Channels.FindIndex(x => x.Name.Equals(channel)));
+            // not sure what toStrng returns
+            int channelIndex = ModuleManager.channels.FindIndex(x => x.Name == channel);
+            // find out if channel exists and module is not added to it, if not added add it
+            if(channelIndex != -1){
+                int moduleIndex = ModuleManager.channels[channelIndex].ActiveModules.FindIndex(x => x == moduleName);
+                if(moduleIndex != -1) {
+                    ModuleManager.channels[channelIndex].ActiveModules.RemoveAt(moduleIndex);
                     return true;
                 }
             }
@@ -281,7 +220,9 @@ namespace Bot.Modules.Points
                 if (query.Count > 0)
                 {
                     return query[0];
-                } else {
+                }
+                else
+                {
                     return "";
                 }
             }
@@ -302,7 +243,9 @@ namespace Bot.Modules.Points
                 {
                     int i = Int32.Parse(query[0]);
                     return i;
-                } else {
+                }
+                else
+                {
                     return -1;
                 }
             }

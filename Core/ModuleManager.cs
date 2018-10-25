@@ -14,7 +14,7 @@ namespace Bot.Core
         List<CommandsModule> commandsModules = new List<CommandsModule>();
 
         List<PassiveModule> passiveModules = new List<PassiveModule>();
-        public Channels channels = new Channels();
+        public static List<Channel> channels = new List<Channel>();
         public BlockingCollection<Message> messages;
         public Thread worker;
         private IRC irc;
@@ -71,20 +71,15 @@ namespace Bot.Core
         public void Handle(Message message)
         {
             // Check if channel exist on the list if so check command modues
-            int channelindex = channels.FindChannel(message.channel);
+            int channelindex = channels.FindIndex(x => x.Name == message.channel);
             if (channelindex != -1)
             {
-                // Check every commandModule 
-                for (int i = 0; i < commandsModules.Count; i++)
-                {
-                    // Check every command in commmand module
-                    List<string> list = commandsModules[i].getIds();
-                    for (int k = 0; k < list.Count; k++)
-                    {
-                        if (message.msg.StartsWith(list[k]) & ((channels.FindModuleIndex(channels.listOfChannels[channelindex], commandsModules[i].GetType().ToString())) != -1))
-                        {
-                            commandsModules[i].HandleMessage(message.channel, message.msg, message.sender);
-                        }
+                Channel channel = channels[channelindex];
+                List<String> activeModules = channel.ActiveModules;
+                foreach(String module in activeModules) {
+                    int index = commandsModules.FindIndex(x => x.moduleName == module);
+                    if(index != -1) {
+                        commandsModules[index].HandleMessage(message);
                     }
                 }
             }

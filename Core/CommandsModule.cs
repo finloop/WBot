@@ -9,24 +9,13 @@ namespace Bot
         #region VARIABLES
         
         private List<string> ids = new List<string>();
-        public List<string> ActiveChannels = new List<string>();
         public IRC irc;
+        public  String moduleName = "null";
 
         #endregion
 
         public List<string> getIds() {
             return ids;
-        }
-        public List<string> getActiveChannels() {
-            return ActiveChannels;
-        }
-
-        public bool isActiveOnChannel(string channel) {
-            for(int i = 0; i < ActiveChannels.Count; i++) {
-                if(channel.Equals(ActiveChannels[i]))
-                    return true;
-            }  
-            return false;
         }
         public void SendChatMessage(string channel, string msg) {
             irc.SendChatMessage(channel,msg);
@@ -38,27 +27,37 @@ namespace Bot
 
         
         public virtual bool AddToChannel(string channel) {
-            for(int i = 0; i < ActiveChannels.Count; i++) {
-                if(channel.Equals(ActiveChannels[i])) {
-                    return false;
-                }
-            }
-            ActiveChannels.Add(channel);
-            return true;
-        }
-
-        public virtual bool RemoveFromChannel(string channel) {
-            for(int i = 0; i < ActiveChannels.Count; i++) {
-                if(channel.Equals(ActiveChannels[i])) {
-                    ActiveChannels.Remove(channel);
+            // not sure what toStrng returns
+            int channelIndex = ModuleManager.channels.FindIndex(x => x.Name == channel);
+            // find out if channel exists and module is not added to it, if not added add it
+            if(channelIndex != -1){
+                int moduleIndex = ModuleManager.channels[channelIndex].ActiveModules.FindIndex(x => x == moduleName);
+                if(moduleIndex == -1) {
+                    ModuleManager.channels[channelIndex].ActiveModules.Add(moduleName);
                     return true;
                 }
             }
             return false;
+
+        }
+
+        public virtual bool RemoveFromChannel(string channel) {
+           // not sure what toStrng returns
+            int channelIndex = ModuleManager.channels.FindIndex(x => x.Name == channel);
+            // find out if channel exists and module is not added to it, if not added add it
+            if(channelIndex != -1){
+                int moduleIndex = ModuleManager.channels[channelIndex].ActiveModules.FindIndex(x => x == moduleName);
+                if(moduleIndex != -1) {
+                    ModuleManager.channels[channelIndex].ActiveModules.RemoveAt(moduleIndex);
+                    return true;
+                }
+            }
+            return false;
+
         }
 
         // Override it to add your custom commands etc.
-        public virtual void HandleMessage(string channel, string msg, string sender) { }
+        public virtual void HandleMessage(Message message) { }
 
         public void addId(string id) {
             int i = ids.FindIndex(x => x.Equals(id));
@@ -67,14 +66,12 @@ namespace Bot
         }
         
         #region CONSTRUCTORS
-        public CommandsModule(List<string> _Ids, List<string> _ActiveChannels, IRC _irc) {
+        public CommandsModule(List<string> _Ids, IRC _irc) {
             ids = _Ids;
-            ActiveChannels = _ActiveChannels;
             irc = _irc;
         }
 
-        public CommandsModule(List<string> _ActiveChannels, IRC _irc) {
-            ActiveChannels = _ActiveChannels;
+        public CommandsModule(IRC _irc) {
             irc = _irc;
             //saveState();
         }

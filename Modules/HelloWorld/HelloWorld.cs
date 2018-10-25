@@ -10,8 +10,8 @@ namespace Bot.Modules.HelloWorld
             base.addId("!hello");
         }
             
-         override public void HandleMessage(string channel, string msg, string sender) {
-            SendChatMessage(channel, "HelloWorld!");
+         override public void HandleMessage(Message message) {
+            SendChatMessage(message.channel, "HelloWorld!");
         }
 
 
