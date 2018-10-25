@@ -55,6 +55,29 @@ namespace Bot.Core
             return moduleParams;
         }
 
+        public static List<Channel> ReadConfigJson(String filename)
+        {
+            try
+            {
+                using (StreamReader readtext = new StreamReader(filename))
+                {
+                    string json = "";
+                    string temp;
+                    while ((temp = readtext.ReadLine()) != null)
+                    {
+                        json += temp;
+                    }
+                    return JsonConvert.DeserializeObject<List<Channel>>(json);
+                }
+            }
+            catch (IOException e)
+            {
+                Log.Exception(e);
+                //System.Environment.Exit(1);
+            }
+            return null;
+        }
+
         public static void WriteConfigJson<T>(T moduleParams)
         {
             try

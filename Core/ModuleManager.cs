@@ -49,7 +49,6 @@ namespace Bot.Core
         private void InitializeCommandModules(IRC irc)
         {
             // Add modules here modules.add(....)
-            channels = FileIO.ReadConfigJson(channels);
             commandsModules.Add(new HelloWorld(irc));
             commandsModules.Add(new Points(irc));
         }
@@ -136,8 +135,8 @@ namespace Bot.Core
         public void JoinChannel(string channel)
         {
             int i = channels.FindIndex(x => x.Name.Equals(channel));
-            if (i == -1)
-                channels.Add(new Channel(channel));
+            //if (i == -1)
+            //    channels.Add(new Channel(channel));
         }
 
         public void LeaveChannel(string channel)

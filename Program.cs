@@ -15,18 +15,20 @@ namespace Bot
         static void Main(string[] args)
         {
             CommandLine cmd = new CommandLine(args);
-            Channels channels = new Channels();
-            channels = FileIO.ReadConfigJson(channels);
 
-            List<string> listchannels = new List<string>();
+            List<Channel> channels = FileIO.ReadConfigJson("Channels.json");
+            ModuleManager.channels = channels;
+            List<String> listofchannels = new List<string>();
 
-            for (int i = 0; i < channels.listOfChannels.Count; i++)
+            foreach (Channel channel in channels)
             {
-                listchannels.Add(channels.listOfChannels[i].Name);
+                listofchannels.Add(channel.Name);
             }
 
+
+
             // Read config from file
-            IRC irc = new IRC(FileIO.ReadConfigParameters("Config.json"), listchannels);
+            IRC irc = new IRC(FileIO.ReadConfigParameters("Config.json"), listofchannels);
             irc.Connect();
 
             MessageHandler messageHandler = new MessageHandler(irc);

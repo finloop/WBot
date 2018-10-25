@@ -9,6 +9,9 @@ namespace Bot.Core
             public string Name { get; set; }
             public List<string> ActiveModules { get; set; }
             public PointsConfig pointsConfig { get; set; }
+            public Channel()
+            {
+            }
             public Channel(string _channel)
             {
                 Name = _channel;
