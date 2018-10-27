@@ -12,13 +12,7 @@ namespace Bot.Extensions.MySql
         public static Boolean checkForSQLInjection(string userInput)
         {
             bool isSQLInjection = false;
-            string[] sqlCheckList = { "--",
-                                       ";--",
-                                       ";",
-                                       "/*",
-                                       "*/",
-                                        "@@",
-                                        "@",
+            string[] sqlCheckList = {                 
                                         "char",
                                        "nchar",
                                        "varchar",
@@ -29,7 +23,6 @@ namespace Bot.Extensions.MySql
                                        "create",
                                        "cursor",
                                        "declare",
-                                       "delete",
                                        "drop",
                                        "end",
                                        "exec",

@@ -11,37 +11,50 @@ namespace Bot.Modules.Points
 {
     public class PointsCommands
     {
-        public static void HandleStartChallenge(string channel, string sender, string msg, IRC irc) {
+        public static void HandleStartChallenge(Message message, IRC irc) {
             // pattern is: !challenge user int(points)
             // m[1] - user 
             // [2] - points
+            String channel = message.channel;
+            String msg = message.msg;
+            String sender = message.sender; 
             Channel channelinfo = ModuleManager.channels.Find(x => x.Name == channel);
+
             string[] m = msg.Split(" ");
             int points;
             if(m.Length >= 3) {
                 if(!Points.isUserChallenged(channel, m[1]) && Int32.TryParse(m[2], out points)) {
                     if(points > 0) {
                         if(points > Points.getPoints(channel, sender)) {
-                            irc.SendChatMessage(channel, string.Format("{0} ma za mało {1}", sender, channelinfo.pointsConfig.pointsNameMultiple));
+                            // send message to the guy who wanted to start
+                            message.msg = string.Format("{0} ma za mało {1}", sender, channelinfo.pointsConfig.pointsNameMultiple);
+                            message.channel = sender;
+                            irc.SendResponse(message);
                             return;
                         }
                         if(points > Points.getPoints(channel, m[1])) {
-                            irc.SendChatMessage(channel, string.Format("{0} ma za mało {1}", m[1], channelinfo.pointsConfig.pointsNameMultiple));
+                            // send message to the guy who wanted to start
+                            //irc.SendChatMessage(channel, string.Format("{0} ma za mało {1}", m[1], channelinfo.pointsConfig.pointsNameMultiple));
+                            message.msg = string.Format("{0} ma za mało {1}", m[1], channelinfo.pointsConfig.pointsNameMultiple);
+                            message.channel = sender;
+                            irc.SendResponse(message);
                             return;
                         }
 
                         Points.setChallenger(channel, sender, m[1], points);
-                        irc.SendChatMessage(channel, string.Format("{0} wyzwał na pojedynek {1} wpisz !{2} aby akceptować pojedynek", sender, m[1], channelinfo.pointsConfig.challengeAccept));
+                        message.msg = string.Format("{0} wyzwał Cię pojedynek, wpisz !{2} na kanale {3} aby akceptować pojedynek", sender, m[1], channelinfo.pointsConfig.challengeAccept, message.channel);
+                        message.sender = m[1];
+                        irc.SendResponse(message);
                         StartCancelThread(channel, m[1], 30000);
                         return;
                     }
 
                 } else {
-                    irc.SendChatMessage(channel, "Coś poszło nie tak monkaS");
+                    //irc.SendChatMessage(channel, "Coś poszło nie tak monkaS");
                     return;
                 }
             } else {
-                irc.SendChatMessage(channel, "Polecenie wpisane niepoprawnie.");
+                //irc.SendChatMessage(channel, "Polecenie wpisane niepoprawnie.");
                 return;
             }
         }
@@ -64,29 +77,61 @@ namespace Bot.Modules.Points
                     CancelChallenge(channel, sender);
                 }
             } else {
-                irc.SendChatMessage(channel, "Polecenie wpisane niepoprawnie.");
+                //irc.SendChatMessage(channel, "Polecenie wpisane niepoprawnie.");
             }
         }
-        public static void HandleShowPoints(string channel, string sender, string msg, IRC irc)
+        public static void HandleDonate(Message message, IRC irc)
         {
+            String channel = message.channel;
+            String msg = message.msg;
+            String sender = message.sender; 
+
+            string[] m = msg.Split(' ');
+            if (m.Length >= 3)
+            {
+                int points;
+                if (Int32.TryParse(m[2], out points) && points > 0) {
+                    int sender_points = Points.getPoints(channel, sender);
+                    int user_points = Points.getPoints(channel, m[1]);
+                    if((sender_points >=points) && (sender_points != -1) && (user_points != -1) ) {
+                        Points.removePoints(channel, sender, points);
+                        Points.addPoints(channel, m[1], points);
+                        Channel channelinfo = ModuleManager.channels.Find(x => x.Name == channel);
+                        message.msg = string.Format("@{0} przekazuje Ci {1} {2} ",sender, points, channelinfo.pointsConfig.pointsNameMultiple);
+                        message.inputId = Message.InputId.whisper;
+                        message.sender = m[1];
+                        irc.SendResponse(message);
+
+                        message.msg = string.Format("Przekazałeś/aś {0} {1} ", points, channelinfo.pointsConfig.pointsNameMultiple, m[1]);
+                        message.sender = sender;
+                        irc.SendResponse(message);
+                    }
+                }
+            }
+        }
+        public static void HandleShowPoints(Message message, IRC irc)
+        {
+            String msg = message.msg;
+            String sender = message.sender; 
+
             string[] m = msg.Split(' ');
             if (m.Length >= 2)
             {
                 if (m[1].Equals("all")) {
                     if(m.Length >= 3) {
                         // handle 3rd 
-                        ShowTotalPoints(channel, m[2], irc);
+                        ShowTotalPoints(message, m[2], irc);
                         return;
                     } else {
-                        ShowTotalPoints(channel, sender, irc);
+                        ShowTotalPoints(message, sender, irc);
                         return;
                     }
                 }
-                ShowPoints(channel, m[1], irc);
+                ShowPoints(message, m[1], irc);
             }
             else if (m.Length == 1)
             {
-                ShowPoints(channel, sender, irc);
+                ShowPoints(message, sender, irc);
             }
         }
 
@@ -107,29 +152,32 @@ namespace Bot.Modules.Points
             t.IsBackground = true;
             t.Start();
         }
-        public static void ShowPoints(string channel, string sender, IRC irc)
+        public static void ShowPoints(Message message, string name, IRC irc)
         {
+            string channel = message.channel;
             Channel channelinfo = ModuleManager.channels.Find(x => x.Name == channel);
-            int p = Points.getPoints(channel, sender);
+
+            int p = Points.getPoints(channel, name);
             if (p == -1)
             {
-                irc.SendChatMessage(channel, string.Format("Nie ma takiego użytkownika."));
+                //irc.SendChatMessage(channel, string.Format("Nie ma takiego użytkownika."));
                 return;
             }
-            string f = string.Format("{0} posiada {1} {2}.", sender, p, channelinfo.pointsConfig.pointsNameMultiple);
+            string f = string.Format("{0} posiada {1} {2}.", name, p, channelinfo.pointsConfig.pointsNameMultiple);
             irc.SendChatMessage(channel, f);
         }
 
-        public static void ShowTotalPoints(string channel, string sender, IRC irc)
+        public static void ShowTotalPoints(Message message, string name, IRC irc)
         {
+            string channel = message.channel;
             Channel channelinfo = ModuleManager.channels.Find(x => x.Name == channel);
-            int p = Points.getTotalPoints(channel, sender);
+            int p = Points.getTotalPoints(channel, name);
             if (p == -1)
             {
-                irc.SendChatMessage(channel, string.Format("Nie ma takiego użytkownika."));
+                //irc.SendChatMessage(channel, string.Format("Nie ma takiego użytkownika."));
                 return;
             }
-            string f = string.Format("{0} posiadał łącznie {1} {2}.", sender, p, channelinfo.pointsConfig.pointsNameMultiple);
+            string f = string.Format("{0} posiadał łącznie {1} {2}.", name, p, channelinfo.pointsConfig.pointsNameMultiple);
             irc.SendChatMessage(channel, f);
         }
 
@@ -144,7 +192,7 @@ namespace Bot.Modules.Points
                 {
                     if (p <= 0)
                     {
-                        irc.SendChatMessage(channel, string.Format("{0} nie mogą być ujemne.", channelinfo.pointsConfig.pointsNameMultiple));
+                        //irc.SendChatMessage(channel, string.Format("{0} nie mogą być ujemne.", channelinfo.pointsConfig.pointsNameMultiple));
                     }
                     else
                     {
@@ -165,7 +213,7 @@ namespace Bot.Modules.Points
                             prc = temp / 100f;
                             if (prc <= 0.0f)
                             {
-                                irc.SendChatMessage(channel, "Polecenie wpisane niepoprawnie.");
+                                //irc.SendChatMessage(channel, "Polecenie wpisane niepoprawnie.");
                                 return;
                             }
                             curPoints = (int)(prc * (float)curPoints);
@@ -173,7 +221,7 @@ namespace Bot.Modules.Points
                         }
                         else
                         {
-                            irc.SendChatMessage(channel, "Polecenie wpisane niepoprawnie.");
+                            //irc.SendChatMessage(channel, "Polecenie wpisane niepoprawnie.");
                         }
                     }
                     else if (m[1].Equals("all"))
@@ -186,12 +234,13 @@ namespace Bot.Modules.Points
             }
             else
             {
-                irc.SendChatMessage(channel, "Polecenie wpisane niepoprawnie.");
+                //irc.SendChatMessage(channel, "Polecenie wpisane niepoprawnie.");
 
             }
         }
         public static void Roulette(string channel, string name, int points, IRC irc)
         {
+
             Channel channelinfo = ModuleManager.channels.Find(x => x.Name == channel);
             if(points > Points.getPoints(channel, name))  {
                 irc.SendChatMessage(channel, string.Format("{0} ma za mało {1}", name, channelinfo.pointsConfig.pointsNameMultiple));

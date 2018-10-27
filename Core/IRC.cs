@@ -125,6 +125,15 @@ namespace Bot.Core
             }
         }
 
+        public void SendResponse(Message message)
+        {
+            if(message.inputId.Equals(Message.InputId.irc)) {
+                SendChatMessage(message.channel, message.msg);
+            } else if(message.inputId.Equals(Message.InputId.whisper)) {
+                SendWhisper(message.sender, message.msg);
+            }
+        }
+
         public void SendWhisper(string reciever, string message)
         {
             try

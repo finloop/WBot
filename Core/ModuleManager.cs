@@ -6,6 +6,7 @@ using System.Threading;
 using System.Collections.Concurrent;
 using Bot.Modules.Subscribe;
 using Bot.Modules.Points;
+using Bot.Modules.Utilities;
 
 namespace Bot.Core
 {
@@ -51,6 +52,7 @@ namespace Bot.Core
             // Add modules here modules.add(....)
             commandsModules.Add(new HelloWorld(irc));
             commandsModules.Add(new Points(irc));
+            commandsModules.Add(new Utilities(irc));
         }
 
         private void InitializePassiveModules(IRC irc) {
@@ -125,7 +127,8 @@ namespace Bot.Core
                 if (k != -1)
                 {
                     commandsModules[i].AddToChannel(channel);
-                    irc.SendChatMessage(channel, "added" + comm +" to this channel");
+                    irc.SendChatMessage(channel, " added " + comm +" to this channel");
+                    FileIO.WriteConfigJson(ModuleManager.channels, "Channels.json");
                 }
 
             }
@@ -135,15 +138,20 @@ namespace Bot.Core
         public void JoinChannel(string channel)
         {
             int i = channels.FindIndex(x => x.Name.Equals(channel));
-            //if (i == -1)
-            //    channels.Add(new Channel(channel));
+            if (i == -1){
+                ModuleManager.channels.Add(new Channel(channel));
+                FileIO.WriteConfigJson(ModuleManager.channels, "Channels.json");
+            }
+
         }
 
         public void LeaveChannel(string channel)
         {
             int i = channels.FindIndex(x => x.Name.Equals(channel));
-            if (i != -1)
+            if (i != -1){
                 channels.RemoveAt(channels.FindIndex(x => x.Name.Equals(channel)));
+                FileIO.WriteConfigJson(ModuleManager.channels, "Channels.json");
+            }
         }
 
         public void RemoveModuleFromChannel(string channel, string comm)
@@ -156,6 +164,7 @@ namespace Bot.Core
                 {
                     commandsModules[i].RemoveFromChannel(channel);
                     irc.SendChatMessage(channel, " removed " + comm +" from this channel");
+                    FileIO.WriteConfigJson(ModuleManager.channels, "Channels.json");
                 }
 
             }

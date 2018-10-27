@@ -8,10 +8,12 @@ namespace Bot.Modules.HelloWorld
     {
         public HelloWorld(IRC _irc) : base(_irc) {
             base.addId("!hello");
+            moduleName = "Bot.Modules.HelloWorld.HelloWorld";
         }
             
          override public void HandleMessage(Message message) {
-            SendChatMessage(message.channel, "HelloWorld!");
+            if(message.msg.StartsWith(getIds()[0]))
+                SendChatMessage(message.channel, "HelloWorld!");
         }
 
 

@@ -15,34 +15,36 @@ namespace Bot.Extensions.Stream
 
         static private void read(string channel)
         {
-            String text;
-            WebClient web = new WebClient();
-            System.IO.Stream stream = web.OpenRead("https://api.twitch.tv/kraken/streams/" + channel + "?client_id=q6batx0epp608isickayubi39itsckt");
-            using (System.IO.StreamReader reader = new System.IO.StreamReader(stream))
+            if (Chatters.config == null)
+                Chatters.config = FileIO.ReadConfigParameters("Config.json");
+            else
             {
-                text = reader.ReadToEnd();
-                json = JsonConvert.DeserializeObject<JsonStream>(text);
+                String text;
+                WebClient web = new WebClient();
+                System.IO.Stream stream = web.OpenRead("https://api.twitch.tv/kraken/streams/" + channel + "?client_id=" + Chatters.config.clientID);
+                using (System.IO.StreamReader reader = new System.IO.StreamReader(stream))
+                {
+                    text = reader.ReadToEnd();
+                    json = JsonConvert.DeserializeObject<JsonStream>(text);
+                }
             }
         }
         static public bool isRunning(string channel)
         {
             read(channel);
+            if(json != null)
             if (json.stream == null)
                 return false;
             else
                 return true;
+            return false;
         }
 
         static public TimeSpan Uptime(string channel)
         {
             if (isRunning(channel))
             {
-                TimeSpan dateTime = DateTime.UtcNow - json.stream.created_at;
-                int sec = (int)dateTime.TotalSeconds;
-                int hours = sec / 3600;
-                int min = (sec % 3600) / 60;
-                sec = (sec % 3600) - min * 60;
-
+                TimeSpan dateTime = DateTime.UtcNow - json.stream.created_at.ToUniversalTime();
                 return dateTime;
             }
             else

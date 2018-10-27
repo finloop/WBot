@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System;
 using Bot.Modules.Points;
+using Bot.Modules.Utilities;
 
 namespace Bot.Core
 {
@@ -9,6 +10,7 @@ namespace Bot.Core
             public string Name { get; set; }
             public List<string> ActiveModules { get; set; }
             public PointsConfig pointsConfig { get; set; }
+            public UtilitiesConfig utilConfig { get; set; }
             public Channel()
             {
             }
@@ -16,12 +18,16 @@ namespace Bot.Core
             {
                 Name = _channel;
                 ActiveModules = new List<string>();
+                pointsConfig = new PointsConfig();
                 pointsConfig.Name = _channel;
                 pointsConfig.pointsName = "points";
                 pointsConfig.challengeName = "challenge";
                 pointsConfig.challengeAccept = "accept";
                 pointsConfig.pointsNameMultiple = "points";
                 pointsConfig.rouletteName = "roulette";
+                pointsConfig.donateName = "donate";
+                utilConfig.uptime = "uptime";
+                utilConfig.viewers = "wiewers";
             }
         }
 

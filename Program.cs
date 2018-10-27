@@ -15,6 +15,7 @@ namespace Bot
         static void Main(string[] args)
         {
             CommandLine cmd = new CommandLine(args);
+            
 
             List<Channel> channels = FileIO.ReadConfigJson("Channels.json");
             ModuleManager.channels = channels;
@@ -25,11 +26,11 @@ namespace Bot
                 listofchannels.Add(channel.Name);
             }
 
-
-
-            // Read config from file
             IRC irc = new IRC(FileIO.ReadConfigParameters("Config.json"), listofchannels);
             irc.Connect();
+
+            // Read config from file
+
 
             MessageHandler messageHandler = new MessageHandler(irc);
 

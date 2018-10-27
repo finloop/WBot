@@ -15,30 +15,35 @@ namespace Bot.Extensions.Stream
     public class Chatters
     {
         static private JsonChatters json = null;
-        static private FileIO.ConfigParameters config;
+        static public FileIO.ConfigParameters config;
 
         static private void read(string channel)
         {
-            try
+            if (config == null)
+                config = FileIO.ReadConfigParameters("Config.json");
+            else
             {
-                if (config == null)
-                    config = FileIO.ReadConfigParameters("Config.json");
-                else
+                try
                 {
-                    String text;
-                    MyWebClient web = new MyWebClient();
-
-                    System.IO.Stream stream = web.OpenRead("https://tmi.twitch.tv/group/user/" + channel + "/chatters?client_id=" + config.clientID);
-                    using (System.IO.StreamReader reader = new System.IO.StreamReader(stream))
+                    if (config == null)
+                        config = FileIO.ReadConfigParameters("Config.json");
+                    else
                     {
-                        text = reader.ReadToEnd();
-                        json = JsonConvert.DeserializeObject<JsonChatters>(text);
+                        String text;
+                        MyWebClient web = new MyWebClient();
+
+                        System.IO.Stream stream = web.OpenRead("https://tmi.twitch.tv/group/user/" + channel + "/chatters?client_id=" + config.clientID);
+                        using (System.IO.StreamReader reader = new System.IO.StreamReader(stream))
+                        {
+                            text = reader.ReadToEnd();
+                            json = JsonConvert.DeserializeObject<JsonChatters>(text);
+                        }
                     }
                 }
-            }
-            catch (Exception w)
-            {
-                Debug.Log.Exception(w);
+                catch (Exception w)
+                {
+                    Debug.Log.Exception(w);
+                }
             }
         }
 

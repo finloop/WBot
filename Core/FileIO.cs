@@ -96,6 +96,24 @@ namespace Bot.Core
             }
         }
 
+        public static void WriteConfigJson<T>(T moduleParams, string filename)
+        {
+            try
+            {
+                using (StreamWriter writetext = new StreamWriter(filename, false))
+                {
+                    string json = JsonConvert.SerializeObject(moduleParams);
+                    writetext.Write(json);
+                    writetext.Flush();
+                }
+            }
+            catch (IOException e)
+            {
+                Log.Exception(e);
+                System.Environment.Exit(1);
+            }
+        }
+
         public static void WriteString(string filename, string text)
         {
             try

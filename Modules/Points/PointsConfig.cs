@@ -10,6 +10,7 @@ namespace Bot.Modules.Points
             public string challengeName { get; set; }
             public string challengeAccept { get; set; }
             public string rouletteName {get; set;}
+            public string donateName {get; set;}
  
     }
 }

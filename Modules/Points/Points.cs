@@ -21,6 +21,7 @@ namespace Bot.Modules.Points
             base.addId("!points");
             base.addId("!challenge");
             base.addId("!accept");
+            base.addId("!donate");
             base.addId("!roulette");
             base.addId("!config pointsName:");
             base.addId("!config pointsMultipleName:");
@@ -48,14 +49,15 @@ namespace Bot.Modules.Points
             string handlechallenge = "!" + ModuleManager.channels[channelIndex].pointsConfig.challengeName;
             string handleacceptchallenge = "!" + ModuleManager.channels[channelIndex].pointsConfig.challengeAccept;
             string handleroulette = "!" + ModuleManager.channels[channelIndex].pointsConfig.rouletteName;
+            string handledonate = "!" + ModuleManager.channels[channelIndex].pointsConfig.donateName;
 
              if (msg.StartsWith(handlepoints))
             {
-                PointsCommands.HandleShowPoints(channel, sender, msg, irc);
+                PointsCommands.HandleShowPoints(message, irc);
             }
             else if (msg.StartsWith(handlechallenge))
             {
-                PointsCommands.HandleStartChallenge(channel, sender, msg, irc);
+                PointsCommands.HandleStartChallenge(message, irc);
             }
             else if (msg.StartsWith(handleacceptchallenge))
             {
@@ -64,6 +66,9 @@ namespace Bot.Modules.Points
             else if (msg.StartsWith(handleroulette))
             {
                 PointsCommands.HandleRoulette(channel, sender, msg, irc);
+            } if (msg.StartsWith(handledonate))
+            {
+                PointsCommands.HandleDonate(message, irc);
             }
         }
 
@@ -108,10 +113,8 @@ namespace Bot.Modules.Points
                 {
                     for (int i = 0; i < v.Count; i++)
                     {
-                        if (addUserIfNotExist(channel, v[i]))
-                        {
-                            addPoints(channel, v[i], 1);
-                        }
+                        addUserIfNotExist(channel, v[i]);
+                        addPoints(channel, v[i], 1);
                     }
                 }
             }
