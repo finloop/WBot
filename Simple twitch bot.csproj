@@ -4,7 +4,7 @@
     <TargetFramework>netcoreapp2.0</TargetFramework>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="Newtonsoft.Json" Version="11.0.2"/>
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.1"/>
     <PackageReference Include="MySql.Data" Version="8.0.12"/>
     <PackageReference Include="Microsoft.Extensions.Configuration" Version="2.1.1"/>
     <PackageReference Include="Microsoft.Extensions.Configuration.FileExtensions" Version="2.1.1"/>
